@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Joi = require('joi');
 
-// Define the User schema
 const userSchema = new Schema({
   username: {
     type: String,
@@ -20,7 +20,14 @@ const userSchema = new Schema({
   }
 });
 
-// Create the User model
 const User = mongoose.model('User', userSchema);
-// Export the model
-module.exports = User;
+
+const validateUser = (data) => {
+  const schema = Joi.object({
+    username: Joi.string().required().trim(),
+    password: Joi.string().required().min(8)
+  });
+  return schema.validate(data);
+};
+
+module.exports = { User, validateUser };
