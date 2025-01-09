@@ -18,9 +18,11 @@ app.use(morgan("dev"));
 
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
+const messageRoutes = require("./src/routes/SendMessageRoute");
 
 // User routes
 app.use("/api/users", userRoutes);
+app.use("/api/send", messageRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
