@@ -13,6 +13,9 @@ const app = express();
 const connectDB = require("./src/config/db");
 connectDB();
 
+app.use(express.json());
+app.use(morgan("dev"));
+
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
 
