@@ -1,30 +1,36 @@
-import logo from './logo.svg';
-import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import './App.css';
+import React from "react";
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import Loader from "./Loader/Loader";
+import Welcome from "./components/Welcome";
+import Login from "./components/Login";
+import Home from "./components/Home";
+import './App.css'; 
 
 function App() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (isLoading) {
+      return <Loader />;
+  }
+
   return (
-    <div className="justify-start font-sans font-semibold">
-        <Routes>
-            <Route path="/" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-            <Route path="/signup" element={<Signup />} />
-            {isAuthenticated ? (
-                <>
-                    <Route path="/app" element={<Home />} />
-                    <Route path="/search" element={<FindPage />} />
-                    <Route path="/spaces/:_id" element={<SpacePage />} />
-                    <Route path="/booking-receipt/:_id" element={<BookingReceipt />} />
-                    <Route path="/contact-us" element={<ContactUs />} />
-                    <Route path="/setting" element={<Setting />} />
-                    <Route path="*" element={<Navigate to="/app" replace />} /> {/* Redirect unknown paths */}
-                </>
-            ) : (
-                <Route path="*" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-            )}
-        </Routes>
-    </div>
-);
+      <div className="justify-start font-sans font-semibold">
+          <Routes>
+              {/* Landing Page route */}
+              <Route path="/" element={<Welcome />} />
+
+              {/* Login Page route */}
+              <Route path="/login" element={<Login />} />
+
+              {/* Home Page route */}
+              <Route path="/app" element={<Home />} />
+
+              {/* Fallback for unknown paths */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+      </div>
+  );
 }
 
 export default App;
