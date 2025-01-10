@@ -5,7 +5,7 @@ import Loader from "./Loader/Loader";
 import Welcome from "./components/Welcome";
 import Login from "./components/Login";
 import Home from "./components/Home";
-import './App.css'; 
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
