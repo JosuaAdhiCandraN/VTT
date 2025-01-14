@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User, validateUser } = require("../models/UserModel");
 
-const JWT_SECRET = process.env.JWT_SECRET || "123adyode";
+/**const JWT_SECRET = process.env.JWT_SECRET || "123adyode";
 
 const generateToken = (user) => {
   const payload = {
@@ -11,6 +11,7 @@ const generateToken = (user) => {
   };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }); // Token berlaku 1 jam
 };
+*/
 
 // Register User
 const registerUser = async (req, res) => {
