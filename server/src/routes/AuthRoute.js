@@ -3,6 +3,7 @@ const { User } = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const { verifyToken } = require("../middleware/AuthMiddleware");
 
 // Login route
 router.post("/", async (req, res) => {
@@ -62,5 +63,46 @@ const validateLogin = (data) => {
     });
     return schema.validate(data);
 };
+
+router.get("/profile", verifyToken, async (req, res) => {
+    try {
+        // Fetch user data from the database
+        const userProfile = await User.findById(req.user._id);
+        if (!userProfile) {
+            console.error("User not found:", req.user._id);
+            return res.status(404).send({ message: "User not found." });
+        }
+
+        // Set user profile data in a cookie
+        res.cookie(
+            "userProfile",
+            JSON.stringify({
+                username: userProfile.username,
+                role: userProfile.role,
+            }),
+            { 
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", 
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                domain:
+                  process.env.NODE_ENV === "production"
+                    ? process.env.FRONTEND_URN
+                    : "localhost", 
+            }
+        );
+
+        // Send the profile data as part of the response as well (optional)
+        res.send({
+            message: "Welcome to your profile!",
+            user: {
+                username: userProfile.username,
+                role: userProfile.role,
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+});
 
 module.exports = router;
