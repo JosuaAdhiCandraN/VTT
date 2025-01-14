@@ -12,6 +12,7 @@ const generateToken = (user) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }); // Token berlaku 1 jam
 };
 
+
 // Register User
 const registerUser = async (req, res) => {
   try {
