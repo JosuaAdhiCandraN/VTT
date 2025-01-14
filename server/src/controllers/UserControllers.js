@@ -1,6 +1,18 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { User, validateUser } = require("../models/UserModel");
 
+const JWT_SECRET = process.env.JWT_SECRET || "123adyode";
+
+const generateToken = (user) => {
+  const payload = {
+    id: user._id,
+    username: user.username,
+  };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }); // Token berlaku 1 jam
+};
+
+// Register User
 const registerUser = async (req, res) => {
   try {
     // Validate user input
@@ -34,6 +46,7 @@ const registerUser = async (req, res) => {
   }
 };
 
+// Login User
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -50,13 +63,37 @@ const loginUser = async (req, res) => {
       return res.status(400).send({ message: "Invalid username or password." });
     }
 
-    res.status(200).send({ message: "Logged in successfully" });
+    // Generate JWT token
+    const token = generateToken(user);
+
+    res.status(200).send({ message: "Logged in successfully", token });
   } catch (error) {
     console.error("Error during login:", error.message || error);
     res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
+// Middleware untuk verifikasi token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.header("Authorization");
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .send({ message: "Access denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Simpan data user dari token ke req.user
+    next();
+  } catch (error) {
+    res.status(403).send({ message: "Invalid or expired token" });
+  }
+};
+
+// Get All Users (Terlindungi)
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -70,13 +107,14 @@ const getAllUsers = async (req, res) => {
     console.error("Error fetching users:", error.message || error);
     res.status(500).send({ message: "Internal Server Error" });
   }
-}; 
+};
 
+// Update User (Terlindungi)
 const updateUser = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validate user input (optional)
+    // Validate user input
     const { error } = validateUser(req.body);
     if (error) {
       return res.status(400).send({ message: error.details[0].message });
@@ -91,7 +129,6 @@ const updateUser = async (req, res) => {
     // Update username or password if provided
     if (username) user.username = username;
     if (password) {
-      // Hash the new password if it is provided
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
     }
@@ -105,9 +142,9 @@ const updateUser = async (req, res) => {
   }
 };
 
+// Delete User (Terlindungi)
 const deleteUser = async (req, res) => {
   try {
-    // Find the user by username
     const user = await User.findOneAndDelete({ username: req.params.username });
     if (!user) {
       return res.status(404).send({ message: "User not found" });
@@ -126,4 +163,5 @@ module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
+  authenticateToken, // Export middleware untuk digunakan
 };
