@@ -2,16 +2,15 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User, validateUser } = require("../models/UserModel");
 
-/**const JWT_SECRET = process.env.JWT_SECRET || "123adyode";
+const JWT_SECRET = process.env.JWT_SECRET || "123adyode";
 
 const generateToken = (user) => {
   const payload = {
     id: user._id,
     username: user.username,
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }); // Token berlaku 1 jam
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 };
-*/
 
 // Register User
 const registerUser = async (req, res) => {
@@ -71,26 +70,6 @@ const loginUser = async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error.message || error);
     res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
-// Middleware untuk verifikasi token
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.header("Authorization");
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res
-      .status(401)
-      .send({ message: "Access denied. No token provided." });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Simpan data user dari token ke req.user
-    next();
-  } catch (error) {
-    res.status(403).send({ message: "Invalid or expired token" });
   }
 };
 
@@ -164,5 +143,4 @@ module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
-  authenticateToken, // Export middleware untuk digunakan
 };
