@@ -2,12 +2,36 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
 // Load environment variables
 dotenv.config();
 const app = express();
+
+
+// CORS options
+const corsOptions = {
+  origin: [
+      "http://localhost:3000", // Frontend dev environment
+      "http://localhost:5000" // Backend dev environment
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Access-Control-Allow-Credentials'
+  ]
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(morgan("dev"));
+app.use(cookieParser());
+
 
 // Setup database connection
 const connectDB = require("./src/config/db");
@@ -19,10 +43,14 @@ app.use(morgan("dev"));
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
 const messageRoutes = require("./src/routes/SendMessageRoute");
+const authRoutes = require("./src/routes/AuthRoute");
+const audioRoutes = require('./src/routes/AudioRoute');
 
 // User routes
 app.use("/api/users", userRoutes);
 app.use("/api/send", messageRoutes);
+app.use("api/auth",authRoutes)
+app.use("/api/audio", audioRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
