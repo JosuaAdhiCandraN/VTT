@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 import {
   ArrowUpFromLine,
   Clock,
   MessageCircle,
   Files,
   Share2,
-  Target
-} from 'lucide-react';
+  Target,
+} from "lucide-react";
 
 const Welcome = () => {
   return (
@@ -22,8 +22,12 @@ const Welcome = () => {
       {/* Header */}
       <header className="relative z-10 w-full flex justify-between items-center px-8 py-4 bg-black bg-opacity-50">
         <div className="flex items-center space-x-2">
-          <img src="/api/placeholder/40/40" alt="DispatchVox Logo" className="h-10 w-auto" />
-          <span className="text-2xl font-bold">DISPATCH VOX</span>
+          <img
+            src="/api/placeholder/40/40"
+            alt="DispatchVox Logo"
+            className="h-10 w-auto"
+          />
+          <span className="text-2xl font-bold"></span>
         </div>
         <button className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-colors">
           SIGN IN
@@ -36,8 +40,10 @@ const Welcome = () => {
           {/* Left Column */}
           <div>
             <h1 className="text-5xl font-bold mb-4">
-              No More<br />
-              Missed<br />
+              No More
+              <br />
+              Missed
+              <br />
               Details -
             </h1>
             <p className="text-3xl text-gray-300 mb-8">
@@ -51,12 +57,14 @@ const Welcome = () => {
 
           {/* Right Column - Steps */}
           <div className="bg-white bg-opacity-10 p-8 rounded-xl backdrop-blur-sm">
-            <h2 className="text-2xl font-bold mb-8">Generate in 3 Simple Steps</h2>
+            <h2 className="text-2xl font-bold mb-8">
+              Generate in 3 Simple Steps
+            </h2>
             <div className="flex items-center justify-between">
               {[
                 { icon: ArrowUpFromLine, text: "Upload\nYour\nFile" },
                 { icon: Clock, text: "Let Us\nDo The\nWork" },
-                { icon: MessageCircle, text: "Check\nYour\nWhatsApp" }
+                { icon: MessageCircle, text: "Check\nYour\nWhatsApp" },
               ].map((step, index) => (
                 <div key={index} className="flex flex-col items-center">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
@@ -72,29 +80,37 @@ const Welcome = () => {
 
       {/* Features Section */}
       <div className="relative z-10 container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why DispatchVox?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Why DispatchVox?
+        </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
             {
               icon: Files,
               title: "Instant Transcription",
               subtitle: "Turn Speech into Text in Seconds",
-              description: "Accurate transcription of audio, so you can focus on insights, not note-taking."
+              description:
+                "Accurate transcription of audio, so you can focus on insights, not note-taking.",
             },
             {
               icon: Share2,
               title: "Sharing Transcript Files",
               subtitle: "Easy Sharing Options",
-              description: "Share any of your transcription file with just one single click."
+              description:
+                "Share any of your transcription file with just one single click.",
             },
             {
               icon: Target,
               title: "Fast and Accurate",
               subtitle: "Never Miss a Detail Again",
-              description: "Can reach up to 99% accuracy when transcribing your files depending on the sound quality."
-            }
+              description:
+                "Can reach up to 99% accuracy when transcribing your files depending on the sound quality.",
+            },
           ].map((feature, index) => (
-            <div key={index} className="bg-white text-blue-900 p-8 rounded-xl text-center hover:shadow-lg transition-shadow">
+            <div
+              key={index}
+              className="bg-white text-blue-900 p-8 rounded-xl text-center hover:shadow-lg transition-shadow"
+            >
               <feature.icon className="w-12 h-12 mx-auto mb-4 text-blue-600" />
               <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
               <p className="text-lg font-semibold mb-2">{feature.subtitle}</p>
