@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowUpFromLine,
   Clock,
@@ -9,6 +10,12 @@ import {
 } from "lucide-react";
 
 const Welcome = () => {
+  const navigate = useNavigate();
+
+  const handleNavigation = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950 text-white flex flex-col">
       {/* Header - Matched with admin dashboard */}
@@ -29,7 +36,10 @@ const Welcome = () => {
           </svg>
           <span className="text-white font-bold text-xl">DISPATCH VOX</span>
         </div>
-        <button className="bg-white text-black px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
+        <button
+          onClick={handleNavigation}
+          className="bg-white text-black px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+        >
           SIGN IN
         </button>
       </header>
@@ -49,11 +59,15 @@ const Welcome = () => {
             <p className="text-3xl text-gray-300">
               Every Call, Captured in Text.
             </p>
-            <button className="bg-black text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center hover:bg-opacity-90 transition-colors">
+            <button
+              onClick={handleNavigation}
+              className="bg-black text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center hover:bg-opacity-90 transition-colors"
+            >
               Get Started →
             </button>
           </div>
 
+          {/* Rest of the component remains the same */}
           {/* Right Column - Steps Card */}
           <div className="bg-blue-900/50 p-8 rounded-3xl backdrop-blur-sm border border-white/10">
             <h2 className="text-2xl font-bold mb-12 text-center">

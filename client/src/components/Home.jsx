@@ -1,6 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [uploadState, setUploadState] = useState({
+    isUploading: false,
+    progress: 0,
+    success: false,
+    fileName: ""
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploadState({
+        isUploading: true,
+        progress: 0,
+        success: false,
+        fileName: file.name
+      });
+
+      // Simulate upload progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        setUploadState(prev => ({
+          ...prev,
+          progress: progress
+        }));
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setUploadState(prev => ({
+            ...prev,
+            isUploading: false,
+            success: true
+          }));
+
+          // Navigate to transcription page after success
+          setTimeout(() => {
+            navigate('/transcription', { 
+              state: { 
+                fileName: file.name,
+                duration: "1:22", // Sample duration - replace with actual audio duration
+                date: new Date().toLocaleString()
+              } 
+            });
+          }, 1500);
+        }
+      }, 200);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
       {/* Header Bar */}
@@ -21,7 +77,10 @@ const Home = () => {
           </svg>
           <span className="text-white font-bold text-xl">DISPATCH VOX</span>
         </div>
-        <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
           LOG OUT
         </button>
       </header>
@@ -66,25 +125,78 @@ const Home = () => {
         {/* Upload Box */}
         <div className="max-w-xl w-full border-2 border-dashed border-white/30 rounded-lg p-8">
           <div className="flex flex-col items-center gap-4">
-            <button className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg flex items-center gap-2 backdrop-blur-sm transition-all">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <input
+              type="file"
+              id="file-upload"
+              className="hidden"
+              onChange={handleFileUpload}
+              accept="audio/*"
+            />
+            {!uploadState.isUploading && !uploadState.success && (
+              <label
+                htmlFor="file-upload"
+                className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg flex items-center gap-2 backdrop-blur-sm transition-all cursor-pointer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Choose File
-            </button>
-            <p className="text-center text-white/80">
-              Upload an audio file from your local device to transcribe.
-            </p>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Choose File
+              </label>
+            )}
+            
+            {/* Upload Progress */}
+            {uploadState.isUploading && (
+              <div className="w-full max-w-xs">
+                <div className="mb-2 text-white text-center">
+                  Uploading {uploadState.fileName}...
+                </div>
+                <div className="w-full bg-white/20 rounded-full h-2.5">
+                  <div 
+                    className="bg-blue-500 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadState.progress}%` }}
+                  ></div>
+                </div>
+                <div className="mt-2 text-white text-center">
+                  {uploadState.progress}%
+                </div>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {uploadState.success && (
+              <div className="text-green-400 flex items-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span>File uploaded successfully!</span>
+              </div>
+            )}
+
+            {!uploadState.isUploading && !uploadState.success && (
+              <p className="text-center text-white/80">
+                Upload an audio file from your local device to transcribe.
+              </p>
+            )}
           </div>
         </div>
       </section>

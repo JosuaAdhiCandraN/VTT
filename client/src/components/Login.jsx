@@ -17,28 +17,41 @@ const Login = () => {
     }
 
     try {
+      // TODO: Replace with actual backend API endpoint
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password, recaptchaToken }),
       });
       const data = await response.json();
+      
       if (response.status === 200) {
+        // Store the token in localStorage for authentication
         localStorage.setItem("token", data.token);
-        navigate("/app");
+        // Redirect to home page after successful login
+        navigate("/home");
       } else {
         alert(data.message || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
+      // TODO: Implement proper error handling
       alert("An error occurred. Please try again later.");
     }
   };
 
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  // Rest of your existing Login component code remains the same
   return (
     <div className="min-h-screen bg-[#020B2C] relative">
-      {/* Back button moved outside card */}
-      <button className="absolute left-6 top-6 text-white/70 hover:text-white">
+      {/* Back button with navigation */}
+      <button
+        onClick={handleBack}
+        className="absolute left-6 top-6 text-white/70 hover:text-white"
+      >
         <svg
           className="w-6 h-6"
           fill="none"

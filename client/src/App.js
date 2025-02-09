@@ -6,6 +6,7 @@ import Welcome from "./components/Welcome";
 import Login from "./components/Login";
 import Home from "./components/Home";
 import Dashboard from "./components/Dashbord";
+import Transcriptiont from "./components/Transcription";
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,9 @@ function App() {
 
         {/* Home Page route */}
         <Route path="/app" element={<Home />} />
+
+        {/* Home Page route */}
+        <Route path="/transcription" element={<Transcriptiont />} />
 
         {/* Dashboard Page route */}
         <Route path="/admin" element={<Dashboard />} />
