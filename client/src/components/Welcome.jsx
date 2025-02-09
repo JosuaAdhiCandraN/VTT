@@ -10,68 +10,90 @@ import {
 
 const Welcome = () => {
   return (
-    <div className="relative min-h-screen bg-blue-900 text-white flex flex-col overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 z-0">
-        {/* Curved lines */}
-        <div className="absolute top-0 right-0 w-full h-32 bg-gradient-to-r from-pink-500/20 to-purple-500/20 blur-3xl transform rotate-[-20deg] translate-y-[-50%]" />
-        <div className="absolute top-20 right-[-10%] w-full h-32 bg-gradient-to-r from-blue-500/20 to-teal-500/20 blur-3xl transform rotate-[-20deg]" />
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-r from-indigo-500/20 to-pink-500/20 blur-3xl transform rotate-[20deg] translate-y-[50%]" />
-      </div>
-
-      {/* Header */}
-      <header className="relative z-10 w-full flex justify-between items-center px-8 py-4 bg-black bg-opacity-50">
+    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950 text-white flex flex-col">
+      {/* Header - Matched with admin dashboard */}
+      <header className="bg-black p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <img
-            src="/api/placeholder/40/40"
-            alt="DispatchVox Logo"
-            className="h-10 w-auto"
-          />
-          <span className="text-2xl font-bold"></span>
+          <svg
+            className="w-6 h-6 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
+            />
+          </svg>
+          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
         </div>
-        <button className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-colors">
+        <button className="bg-white text-black px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
           SIGN IN
         </button>
       </header>
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Column */}
-          <div>
-            <h1 className="text-5xl font-bold mb-4">
+          <div className="space-y-6">
+            <h1 className="text-6xl font-bold leading-tight">
               No More
               <br />
               Missed
               <br />
-              Details -
+              Details —
             </h1>
-            <p className="text-3xl text-gray-300 mb-8">
+            <p className="text-3xl text-gray-300">
               Every Call, Captured in Text.
             </p>
-            <button className="bg-white text-black px-8 py-3 rounded-full font-semibold inline-flex items-center hover:bg-opacity-90 transition-colors">
-              Get Started
-              <span className="ml-2">→</span>
+            <button className="bg-black text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center hover:bg-opacity-90 transition-colors">
+              Get Started →
             </button>
           </div>
 
-          {/* Right Column - Steps */}
-          <div className="bg-white bg-opacity-10 p-8 rounded-xl backdrop-blur-sm">
-            <h2 className="text-2xl font-bold mb-8">
+          {/* Right Column - Steps Card */}
+          <div className="bg-blue-900/50 p-8 rounded-3xl backdrop-blur-sm border border-white/10">
+            <h2 className="text-2xl font-bold mb-12 text-center">
               Generate in 3 Simple Steps
             </h2>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               {[
-                { icon: ArrowUpFromLine, text: "Upload\nYour\nFile" },
-                { icon: Clock, text: "Let Us\nDo The\nWork" },
-                { icon: MessageCircle, text: "Check\nYour\nWhatsApp" },
-              ].map((step, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                    <step.icon className="w-8 h-8 text-blue-900" />
+                {
+                  number: "1",
+                  icon: ArrowUpFromLine,
+                  text: ["Upload", "Your", "File"],
+                },
+                {
+                  number: "2",
+                  icon: Clock,
+                  text: ["Let Us", "Do The", "Work"],
+                },
+                {
+                  number: "3",
+                  icon: MessageCircle,
+                  text: ["Check", "Your", "WhatsApp"],
+                },
+              ].map((step, index, array) => (
+                <React.Fragment key={index}>
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                      <step.icon className="w-8 h-8 text-blue-900" />
+                    </div>
+                    <div className="text-center">
+                      {step.text.map((line, i) => (
+                        <div key={i} className="text-sm font-medium">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-center whitespace-pre-line">{step.text}</p>
-                </div>
+                  {index < array.length - 1 && (
+                    <div className="w-16 h-0.5 bg-white/50 mt-[-20px]" />
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>
@@ -79,8 +101,8 @@ const Welcome = () => {
       </div>
 
       {/* Features Section */}
-      <div className="relative z-10 container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">
+      <div className="container mx-auto px-4 py-16">
+        <h2 className="text-4xl font-bold text-center mb-12">
           Why DispatchVox?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -109,7 +131,7 @@ const Welcome = () => {
           ].map((feature, index) => (
             <div
               key={index}
-              className="bg-white text-blue-900 p-8 rounded-xl text-center hover:shadow-lg transition-shadow"
+              className="bg-white text-blue-900 p-8 rounded-2xl text-center hover:shadow-lg transition-shadow"
             >
               <feature.icon className="w-12 h-12 mx-auto mb-4 text-blue-600" />
               <h3 className="text-xl font-bold mb-2">{feature.title}</h3>

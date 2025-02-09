@@ -5,6 +5,7 @@ import Loader from "./Loader/Loader";
 import Welcome from "./components/Welcome";
 import Login from "./components/Login";
 import Home from "./components/Home";
+import Dashboard from "./components/Dashbord";
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,9 @@ function App() {
         {/* Home Page route */}
         <Route path="/app" element={<Home />} />
 
+        {/* Dashboard Page route */}
+        <Route path="/admin" element={<Dashboard />} />
+
         {/* Fallback for unknown paths */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -34,12 +38,12 @@ function App() {
 
 // Helper function to retrieve a cookie by name
 function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) {
-        return parts.pop().split(';').shift();
-    }
-    return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop().split(";").shift();
+  }
+  return null;
 }
 
 export default App;
