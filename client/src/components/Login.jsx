@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); 
+  const [captcha, setCaptcha] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!recaptchaToken) {
@@ -17,28 +22,19 @@ const Login = () => {
     }
 
     try {
-      // TODO: Replace with actual backend API endpoint
-      const response = await fetch("http://localhost:5000/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, recaptchaToken }),
+      // Kirim permintaan POST ke backend
+      const response = await axios.post("http://localhost:5000/login", {
+        username,
+        password,
       });
-      const data = await response.json();
-      
-      if (response.status === 200) {
-        // Store the token in localStorage for authentication
-        localStorage.setItem("token", data.token);
-        // Redirect to home page after successful login
-        navigate("/home");
-      } else {
-        alert(data.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      // TODO: Implement proper error handling
-      alert("An error occurred. Please try again later.");
+      const { message } = response.data;
+      document.cookie = `token=${response.data.token}; path=/;`;
+      alert(message);l
+    } catch (err) {
+      setError(err.response?.data?.message || "Login gagal");
     }
   };
+
 
   const handleBack = () => {
     navigate("/");
