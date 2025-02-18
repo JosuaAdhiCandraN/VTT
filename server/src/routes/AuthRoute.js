@@ -3,7 +3,7 @@ const { User } = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const { verifyToken } = require("../middleware/AuthMiddleware");
+const { authenticateToken } = require("../middleware/AuthMiddleware");
 
 // Login route
 router.post("/", async (req, res) => {
@@ -64,12 +64,12 @@ const validateLogin = (data) => {
     return schema.validate(data);
 };
 
-router.get("/profile", verifyToken, async (req, res) => {
+router.get("/profile", authenticateToken, async (req, res) => {
     try {
         // Fetch user data from the database
-        const userProfile = await User.findById(req.user._id);
+        const userProfile = await User.findById(req.user.username);
         if (!userProfile) {
-            console.error("User not found:", req.user._id);
+            console.error("User not found:", req.user.username);
             return res.status(404).send({ message: "User not found." });
         }
 
