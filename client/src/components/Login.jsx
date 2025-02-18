@@ -1,45 +1,100 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
+    const [data, setData] = useState({ username: "", password: "" }); // Menggunakan username bukan email
+    const [rememberMe, setRememberMe] = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = () => {
-        // Tambahkan logika autentikasi di sini
-        navigate('/app'); // Navigasi ke Home Page setelah login berhasil
+    const handleChange = ({ currentTarget: input }) => {
+        setData({ ...data, [input.name]: input.value });
+    };
+
+    const handleCheckboxChange = () => {
+        setRememberMe(!rememberMe);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(""); // Reset error state before making request
+        try {
+            // Menggunakan URL yang tepat untuk API login (pastikan URL benar sesuai lingkungan)
+            const response = await axios.post('https://localhost:5000/api/auth/login', {
+                username: data.username, // Menggunakan username
+                password: data.password
+            }, { withCredentials: true });
+
+            // Mengecek apakah login berhasil
+            if (response.status === 200) {
+                if (rememberMe) {
+                    localStorage.setItem("username", data.username); // Menyimpan username di localStorage
+                } else {
+                    localStorage.removeItem("username"); // Hapus username jika tidak diingat
+                }
+
+                onLoginSuccess(); // Panggil callback onLoginSuccess
+                navigate('/app'); // Navigasi ke halaman setelah login
+            }
+        } catch (error) {
+            // Menangani error dengan lebih baik
+            if (error.response && error.response.status >= 400 && error.response.status <= 500) {
+                setError(error.response.data.message || "Login failed. Please try again.");
+            } else {
+                setError("An unexpected error occurred. Please try again later.");
+            }
+        } finally {
+            setLoading(false); // Set loading ke false setelah proses selesai
+        }
     };
 
     return (
-        <section className="flex flex-col justify-center items-center h-screen bg-gray-100">
-            <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-6">
-                <h1 className="text-xl font-bold text-center mb-6">Sign In</h1>
-                <form>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <div>
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="username">Username</label>
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        value={data.username}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="password">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        value={data.password}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label>
                         <input
-                            type="email"
-                            className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300"
-                            required
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={handleCheckboxChange}
                         />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <input
-                            type="password"
-                            className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300"
-                            required
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        onClick={handleLogin}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
-                    >
-                        Login
-                    </button>
-                </form>
+                        Remember me
+                    </label>
+                </div>
+                {error && <div style={{ color: 'red' }}>{error}</div>}
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
+            </form>
+            <div>
+                <Link to="/forgot-password">Forgot password?</Link>
             </div>
-        </section>
+        </div>
     );
 };
 
