@@ -8,8 +8,19 @@ const Dashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [deletingUser, setDeletingUser] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [formData, setFormData] = useState({ username: "", password: "" });
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleEdit = (user) => {
     setEditingUser(user);
@@ -21,25 +32,61 @@ const Dashboard = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const handleCloseCreate = () => {
+    if (formData.username || formData.password) {
+      setIsCancelModalOpen(true);
+    } else {
+      setIsCreateModalOpen(false);
+    }
+  };
+
+  const confirmCancel = () => {
+    setIsCancelModalOpen(false);
+    setIsCreateModalOpen(false);
+    setFormData({ username: "", password: "" });
+  };
+
   const handleCreate = (e) => {
     e.preventDefault();
-    // Logic untuk create akan ditambahkan di sini
+    if (formData.username && formData.password) {
+      setShowConfirmation(true);
+    }
+  };
+
+  const confirmCreate = () => {
+    setShowConfirmation(false);
+    const newUser = {
+      id: users.length + 1,
+      ...formData,
+    };
+    setUsers([...users, newUser]);
+    setFormData({ username: "", password: "" });
     setIsCreateModalOpen(false);
+
+    // Add transition by delaying success notification
+    setTimeout(() => setShowSuccess(true), 100);
+    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const confirmDelete = () => {
-    // Logic untuk delete akan ditambahkan di sini
+    setUsers(users.filter((user) => user.id !== deletingUser.id));
     setIsDeleteModalOpen(false);
+    setDeletingUser(null);
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    // Logic untuk save akan ditambahkan di sini
+    const updatedUsers = users.map((user) =>
+      user.id === editingUser.id ? { ...user, ...formData } : user
+    );
+    setUsers(updatedUsers);
     setIsEditModalOpen(false);
+    setEditingUser(null);
+    setFormData({ username: "", password: "" });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
+    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950 font-poppins">
       {/* Header Bar */}
       <header className="bg-black p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -145,11 +192,11 @@ const Dashboard = () => {
 
       {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-green-500 p-8 rounded-lg w-96 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
+          <div className="bg-green-500 p-8 rounded-lg w-96 relative animate-fadeIn">
             {/* Close button */}
             <button
-              onClick={() => setIsCreateModalOpen(false)}
+              onClick={handleCloseCreate}
               className="absolute top-2 right-2 text-white hover:text-gray-200"
             >
               <svg
@@ -191,7 +238,10 @@ const Dashboard = () => {
                 <label className="block text-white mb-2">Username</label>
                 <input
                   type="text"
-                  className="w-full p-2 rounded"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full p-3 rounded text-lg"
                   placeholder="Enter username"
                 />
               </div>
@@ -199,6 +249,9 @@ const Dashboard = () => {
                 <label className="block text-white mb-2">Password</label>
                 <input
                   type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   className="w-full p-2 rounded"
                   placeholder="Enter password"
                 />
@@ -227,10 +280,85 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-80 animate-fadeIn">
+            <h3 className="text-xl font-bold mb-4">Create account?</h3>
+            <p className="mb-6">Please verify that all details are correct.</p>
+            <div className="flex gap-4">
+              <button
+                onClick={confirmCreate}
+                className="flex-1 bg-green-500 text-white py-2 rounded-lg font-bold hover:bg-green-600"
+              >
+                YES
+              </button>
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600"
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-80 animate-fadeIn">
+            <h3 className="text-xl font-bold mb-4">Cancel create account?</h3>
+            <p className="mb-6">The current progress will not be saved.</p>
+            <div className="flex gap-4">
+              <button
+                onClick={confirmCancel}
+                className="flex-1 bg-green-500 text-white py-2 rounded-lg font-bold hover:bg-green-600"
+              >
+                YES
+              </button>
+              <button
+                onClick={() => setIsCancelModalOpen(false)}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600"
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Notification */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 bg-white p-4 rounded-lg shadow-lg z-50 animate-slideIn">
+          <div className="flex items-center gap-2">
+            <span className="font-bold">Account created successfully.</span>
+            <button
+              onClick={() => setShowSuccess(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-blue-600 p-8 rounded-lg w-96 relative">
+          <div className="bg-blue-600 p-8 rounded-lg w-96 relative animate-fadeIn">
             {/* Close button */}
             <button
               onClick={() => setIsEditModalOpen(false)}
@@ -250,7 +378,6 @@ const Dashboard = () => {
                 />
               </svg>
             </button>
-
             {/* Modal title */}
             <div className="flex items-center gap-2 text-white mb-6">
               <svg
@@ -275,16 +402,20 @@ const Dashboard = () => {
                 <label className="block text-white mb-2">Username</label>
                 <input
                   type="text"
-                  className="w-full p-2 rounded"
+                  name="username"
                   defaultValue={editingUser?.username}
+                  onChange={handleInputChange}
+                  className="w-full p-3 rounded text-lg"
                 />
               </div>
               <div className="mb-6">
                 <label className="block text-white mb-2">Password</label>
                 <input
                   type="password"
-                  className="w-full p-2 rounded"
+                  name="password"
                   defaultValue={editingUser?.password}
+                  onChange={handleInputChange}
+                  className="w-full p-2 rounded"
                 />
               </div>
               <button
@@ -314,7 +445,7 @@ const Dashboard = () => {
       {/* Delete Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-red-600 p-8 rounded-lg w-96 relative">
+          <div className="bg-red-600 p-8 rounded-lg w-96 relative animate-fadeIn">
             {/* Close button */}
             <button
               onClick={() => setIsDeleteModalOpen(false)}
