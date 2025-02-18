@@ -10,7 +10,6 @@ const morgan = require("morgan");
 dotenv.config();
 const app = express();
 
-
 // CORS options
 const corsOptions = {
   origin: [
@@ -42,15 +41,13 @@ app.use(morgan("dev"));
 
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
-const messageRoutes = require("./src/routes/SendMessageRoute");
 const authRoutes = require("./src/routes/AuthRoute");
-const audioRoutes = require('./src/routes/AudioRoute');
+const audioRoutes = require("./src/routes/transcribeRoute");
 
 // User routes
 app.use("/api/users", userRoutes);
-app.use("/api/send", messageRoutes);
-app.use("api/auth",authRoutes)
-app.use("/api/audio", audioRoutes);
+app.use("api/auth",authRoutes);
+app.use("api/audio",audioRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
