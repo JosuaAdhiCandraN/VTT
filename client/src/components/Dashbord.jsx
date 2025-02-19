@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -11,6 +12,26 @@ const Dashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        window.location.href = "/login";
+      } else {
+        const data = await response.json();
+        alert(data.message || "Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -122,7 +143,10 @@ const Dashboard = () => {
           </svg>
           <span className="text-white font-bold text-xl">DISPATCH VOX</span>
         </div>
-        <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        <button
+          onClick={() => handleLogout()}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
           LOG OUT
         </button>
       </header>
