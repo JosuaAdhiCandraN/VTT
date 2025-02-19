@@ -8,6 +8,7 @@ const generateToken = (user) => {
   const payload = {
     id: user._id,
     username: user.username,
+    role: user.role, // Tambahkan ini
   };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 };
@@ -67,7 +68,12 @@ const loginUser = async (req, res) => {
     // Generate JWT token
     const token = generateToken(user);
 
-    res.status(200).send({ message: "Logged in successfully", token });
+    // Tambahkan role dalam response
+    res.status(200).send({
+      message: "Logged in successfully",
+      token,
+      role: user.role, // Tambahkan ini
+    });
   } catch (error) {
     console.error("Error during login:", error.message || error);
     res.status(500).send({ message: "Internal Server Error" });
