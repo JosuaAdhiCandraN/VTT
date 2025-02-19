@@ -33,7 +33,7 @@ const validateUser = (data) => {
   const schema = Joi.object({
     username: Joi.string().required().trim(),
     password: Joi.string().required().min(8),
-    role: Joi.string().valid("user", "admin").default("user"),
+    role: Joi.string().valid("user", "admin").optional().default("user"),
   });
   return schema.validate(data);
 };
