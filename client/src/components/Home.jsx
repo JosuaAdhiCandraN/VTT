@@ -8,10 +8,24 @@ const Home = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [transcription, setTranscription] = useState("");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  const handleLogout = async () => {
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            window.location.href = "/login"; 
+        } else {
+            const data = await response.json();
+            alert(data.message || "Logout failed");
+        }
+    } catch (error) {
+        console.error("Logout error:", error);
+        alert("An error occurred. Please try again.");
+    }
+};
 
   const handleFileChange = (event) => {
     setAudio(event.target.files[0]);
@@ -26,13 +40,12 @@ const Home = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/audio",
+        "http://localhost:5000/api/transcribe", // Sesuaikan dengan route backend
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
       setTranscription(res.data.text);
       setIsUploading(false);
 
