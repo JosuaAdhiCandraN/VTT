@@ -46,8 +46,8 @@ const audioRoutes = require("./src/routes/transcribeRoute");
 
 // User routes
 app.use("/api/users", userRoutes);
-app.use("api/auth",authRoutes);
-app.use("api/audio",audioRoutes);
+app.use("/api/auth",authRoutes);
+app.use("/api/audio",audioRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
