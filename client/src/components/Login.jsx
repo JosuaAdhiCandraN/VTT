@@ -8,12 +8,11 @@ const Login = () => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!recaptchaToken) {
@@ -22,19 +21,34 @@ const Login = () => {
     }
 
     try {
-      // Kirim permintaan POST ke backend
-      const response = await axios.post("http://localhost:5000/login", {
-        username,
-        password,
+      const response = await fetch("http://localhost:5000/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, recaptchaToken }),
       });
-      const { message } = response.data;
-      document.cookie = `token=${response.data.token}; path=/;`;
-      alert(message);l
-    } catch (err) {
-      setError(err.response?.data?.message || "Login gagal");
+      const data = await response.json();
+
+      console.log("Login response data:", data); // Add this line for debugging
+
+      if (response.status === 200) {
+        // Store the token and role in localStorage for authentication
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role); // Assuming role is in the response
+
+        // Navigate based on role
+        if (data.role === "admin") {
+          navigate("/admin"); // Admin Dashboard
+        } else {
+          navigate("/app"); // User's app page
+        }
+      } else {
+        alert(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred. Please try again later.");
     }
   };
-
 
   const handleBack = () => {
     navigate("/");
@@ -129,7 +143,7 @@ const Login = () => {
                           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                         />
                       </svg>
-                    ) : (  
+                    ) : (
                       <svg
                         className="w-5 h-5"
                         fill="none"

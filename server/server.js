@@ -13,16 +13,16 @@ const app = express();
 // CORS options
 const corsOptions = {
   origin: [
-      "http://localhost:3000", // Frontend dev environment
-      "http://localhost:5000" // Backend dev environment
+    "http://localhost:3000", // Frontend dev environment
+    "http://localhost:5000", // Backend dev environment
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
   allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Access-Control-Allow-Credentials'
-  ]
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Credentials",
+  ],
 };
 
 // Middleware
@@ -30,7 +30,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
-
 
 // Setup database connection
 const connectDB = require("./src/config/db");
@@ -46,8 +45,8 @@ const audioRoutes = require("./src/routes/transcribeRoute");
 
 // User routes
 app.use("/api/users", userRoutes);
-app.use("api/auth",authRoutes);
-app.use("api/audio",audioRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/audio", audioRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

@@ -1,88 +1,105 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Dashboard = () => {
-  const [users, setUsers] = useState([
-    { id: 1, username: "Aaaaaaaaa", password: "****" },
-    { id: 2, username: "Bbbbbbbbbb", password: "****" },
-  ]);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [deletingUser, setDeletingUser] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/users");
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/api/users/register", formData);
+      fetchUsers(); // Re-fetch users to update the list
+      setFormData({ username: "", password: "" });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  };
+
+  const handleDelete = async (user) => {
+    try {
+      // Langsung delete menggunakan username
+      await axios.delete(`http://localhost:5000/api/users/${user.username}`);
+      console.log("User deleted successfully");
+      fetchUsers(); // Refresh list setelah berhasil delete
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      // Optional: Tambahkan feedback ke user
+      if (error.response?.status === 404) {
+        alert("User not found");
+      } else {
+        alert("Failed to delete user. Please try again.");
+      }
+    }
   };
 
   const handleEdit = (user) => {
     setEditingUser(user);
+    setFormData({ username: user.username, password: "" }); // Pre-fill the form with current user data
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (user) => {
-    setDeletingUser(user);
-    setIsDeleteModalOpen(true);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleCloseCreate = () => {
-    if (formData.username || formData.password) {
-      setIsCancelModalOpen(true);
-    } else {
-      setIsCreateModalOpen(false);
-    }
-  };
-
-  const confirmCancel = () => {
-    setIsCancelModalOpen(false);
     setIsCreateModalOpen(false);
-    setFormData({ username: "", password: "" });
   };
 
-  const handleCreate = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    if (formData.username && formData.password) {
-      setShowConfirmation(true);
+    try {
+      await axios.put(
+        `http://localhost:5000/api/users/${editingUser.username}`,
+        formData
+      );
+      fetchUsers(); // Re-fetch after updating
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error saving user:", error);
     }
   };
 
   const confirmCreate = () => {
     setShowConfirmation(false);
-    const newUser = {
-      id: users.length + 1,
-      ...formData,
-    };
-    setUsers([...users, newUser]);
-    setFormData({ username: "", password: "" });
-    setIsCreateModalOpen(false);
-
-    // Add transition by delaying success notification
-    setTimeout(() => setShowSuccess(true), 100);
-    setTimeout(() => setShowSuccess(false), 3000);
+    handleCreate();
   };
 
-  const confirmDelete = () => {
-    setUsers(users.filter((user) => user.id !== deletingUser.id));
+  const confirmCancel = () => {
+    setIsCancelModalOpen(false);
+    setFormData({ username: "", password: "" });
+  };
+
+  const confirmDelete = async () => {
+    await handleDelete(editingUser.id);
     setIsDeleteModalOpen(false);
-    setDeletingUser(null);
-  };
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    const updatedUsers = users.map((user) =>
-      user.id === editingUser.id ? { ...user, ...formData } : user
-    );
-    setUsers(updatedUsers);
-    setIsEditModalOpen(false);
-    setEditingUser(null);
-    setFormData({ username: "", password: "" });
   };
 
   return (
@@ -161,8 +178,9 @@ const Dashboard = () => {
                           </svg>
                           EDIT
                         </button>
+                        {/* Di bagian tabel */}
                         <button
-                          onClick={() => handleDelete(user)}
+                          onClick={() => handleDelete(user)} // Pastikan passing user object lengkap
                           className="bg-red-600 text-white px-4 py-1 rounded-md hover:bg-red-700 flex items-center gap-1"
                         >
                           <svg
@@ -448,7 +466,7 @@ const Dashboard = () => {
           <div className="bg-red-600 p-8 rounded-lg w-96 relative animate-fadeIn">
             {/* Close button */}
             <button
-              onClick={() => setIsDeleteModalOpen(false)}
+              onClick={() => setIsDeleteModalOpen(true)}
               className="absolute top-2 right-2 text-white hover:text-gray-200"
             >
               <svg

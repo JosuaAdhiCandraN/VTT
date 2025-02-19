@@ -12,7 +12,6 @@ const generateToken = (user) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 };
 
-
 // Register User
 const registerUser = async (req, res) => {
   try {
@@ -37,6 +36,7 @@ const registerUser = async (req, res) => {
     user = new User({
       username: req.body.username,
       password: hashedPassword,
+      role: req.body.role,
     });
     await user.save();
 
