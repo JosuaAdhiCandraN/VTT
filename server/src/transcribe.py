@@ -11,17 +11,26 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
 # Ambil path file dari argument
+if len(sys.argv) < 2:
+    print("Usage: python transcribe.py <audio_path>", file=sys.stderr)
+    sys.exit(1)
+
 audio_path = sys.argv[1]
 
-# Load audio & resample ke 16kHz
-audio, rate = librosa.load(audio_path, sr=16000)
+try:
+    audio, rate = librosa.load(audio_path, sr=16000)
+except Exception as e:
+    print(f"Error processing audio: {str(e)}", file=sys.stderr)
+    sys.exit(1)
 
 # Proses audio
 input_features = processor(audio, sampling_rate=16000, return_tensors="pt").input_features.to(device)
 
-# Transkripsi
-forced_decoder_ids = processor.get_decoder_prompt_ids(language="id", task="transcribe")
-predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids)
+# Transkripsi dengan penghematan memori
+with torch.no_grad():
+    forced_decoder_ids = processor.get_decoder_prompt_ids(language="id", task="transcribe")
+    predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=200)
+
 transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 
 # Cetak hasil transkripsi ke stdout
