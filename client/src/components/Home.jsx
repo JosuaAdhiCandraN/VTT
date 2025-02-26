@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Home = () => {
   const navigate = useNavigate();
   const [audio, setAudio] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [transcription, setTranscription] = useState("");
 
   const handleLogout = async () => {
     try {
@@ -27,41 +26,44 @@ const Home = () => {
     }
 };
 
-  const handleFileChange = (event) => {
-    setAudio(event.target.files[0]);
-  };
+const handleFileChange = (event) => {
+  setAudio(event.target.files[0]);
+};
 
-  const handleUpload = async () => {
-    if (!audio) return alert("Pilih file audio terlebih dahulu!");
 
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("audio", audio);
+const handleUpload = async () => {
+  if (!audio) {
+    alert("Pilih file audio terlebih dahulu!");
+    return;
+  }
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/transcribe", // Sesuaikan dengan route backend
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      setTranscription(res.data.text);
-      setIsUploading(false);
+  setIsUploading(true);
+  const formData = new FormData();
+  formData.append("audio", audio);
 
-      navigate("/transcription", {
-        state: {
-          fileName: audio.name,
-          transcription: res.data.text,
-          date: new Date().toLocaleString(),
-        },
-      });
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Gagal memproses audio.");
-      setIsUploading(false);
-    }
-  };
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/audio/upload", // Sesuaikan dengan route backend
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    setIsUploading(false);
+
+    navigate("/transcription", {
+      state: {
+        fileName: audio.name,
+        filePath: res.data.filePath,
+        date: new Date().toLocaleString(),
+      },
+    });
+  } catch (error) {
+    console.error("Error:", error.response ? error.response.data : error);
+    alert("Gagal mengunggah audio.");
+    setIsUploading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
