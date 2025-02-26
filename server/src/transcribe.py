@@ -4,7 +4,7 @@ import librosa
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 # Load model & processor
-model_name = "openai/whisper-small"
+model_name = "openai/whisper-base"
 processor = WhisperProcessor.from_pretrained(model_name)
 model = WhisperForConditionalGeneration.from_pretrained(model_name)
 
@@ -33,7 +33,7 @@ try:
     # Transkripsi dengan penghematan memori
     with torch.no_grad():
         forced_decoder_ids = processor.get_decoder_prompt_ids(language="id", task="transcribe")
-        predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=200)
+        predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=1000)
 
     transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 

@@ -13,18 +13,21 @@ const uploadAudio = (req, res) => {
 
   console.log(`Processing audio: ${audioFilePath}`);
 
-  exec(`python "${transcribeScript}" "${audioFilePath}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error in Python script: ${stderr}`);
-      return res.status(500).json({ error: "Transcription failed" });
-    }
+  exec(
+    `python "${transcribeScript}" "${audioFilePath}"`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error in Python script: ${stderr}`);
+        return res.status(500).json({ error: "Transcription failed" });
+      }
 
-    res.json({
-      message: "File uploaded and transcribed successfully",
-      filename: req.file.filename,
-      transcription: stdout.trim(), // Hasil transkripsi
-    });
-  });
+      res.json({
+        message: "File uploaded and transcribed successfully",
+        filename: req.file.filename,
+        transcription: stdout.trim(), // Hasil transkripsi
+      });
+    }
+  );
 };
 
 module.exports = { uploadAudio };

@@ -1,3 +1,4 @@
+// Home.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../axios";
@@ -47,12 +48,10 @@ const Home = () => {
 
       setIsUploading(false);
 
-      // Sekarang mengambil transcription dari respons
       navigate("/transcription", {
         state: {
-          fileName: audio.name,
-          filePath: res.data.filename, // Filename dari respons backend
-          transcription: res.data.transcription, // Hasil transkripsi dari respons backend
+          fileName: res.data.filename, // Pakai filename dari backend biar sinkron
+          transcription: res.data.transcription,
           date: new Date().toLocaleString(),
         },
       });
@@ -69,60 +68,22 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
       <header className="bg-black p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <svg
-            className="w-6 h-6 text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
-            />
-          </svg>
-          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        >
+        <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+        <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
           LOG OUT
         </button>
       </header>
-
       <section className="flex flex-col items-center p-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-center mt-16 mb-20 text-white">
+        <h1 className="text-4xl font-bold text-center mt-16 mb-20 text-white">
           Upload, Transcribe, and Simplify.
         </h1>
-
         <div className="max-w-xl w-full border-2 border-dashed border-white/30 rounded-lg p-8 text-center">
-          <input
-            type="file"
-            accept="audio/*"
-            className="hidden"
-            id="file-upload"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="file-upload"
-            className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg cursor-pointer"
-          >
+          <input type="file" accept="audio/*" className="hidden" id="file-upload" onChange={handleFileChange} />
+          <label htmlFor="file-upload" className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg cursor-pointer">
             Pilih File Audio
           </label>
-          <p className="text-white mt-4">
-            {audio ? audio.name : "Tidak ada file yang dipilih"}
-          </p>
-
-          <button
-            onClick={handleUpload}
-            className={`mt-4 px-6 py-3 rounded-lg text-white ${
-              isUploading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-            disabled={isUploading}
-          >
+          <p className="text-white mt-4">{audio ? audio.name : "Tidak ada file yang dipilih"}</p>
+          <button onClick={handleUpload} className="mt-4 px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700" disabled={isUploading}>
             {isUploading ? "Mengunggah..." : "Unggah dan Transkrip"}
           </button>
         </div>
