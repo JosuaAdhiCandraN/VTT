@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../axios";
+<<<<<<< HEAD
 import logo from "../assets/Logo.png"; 
 import bgImage from "../assets/BG_MainClient.png"; 
+=======
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
 const Home = () => {
   const navigate = useNavigate();
@@ -66,12 +69,18 @@ const handleUpload = async () => {
 };
 
   return (
+<<<<<<< HEAD
     <div
     className="min-h-screen bg-cover bg-center"
     style={{ backgroundImage: `url(${bgImage})` }}
   >
       <header className="bg-black p-4 flex justify-between items-center">
       <img src={logo} alt="Dispatch Vox Logo" className="w-40 h-15" />
+=======
+    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
+      <header className="bg-black p-4 flex justify-between items-center">
+        <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
         <button
           onClick={handleLogout}
           className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"

@@ -1,13 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+<<<<<<< HEAD
 import logo from "../assets/Logo.png"; 
 import bgImage from "../assets/BG_MainClient.png"; 
+=======
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
 const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { fileName, duration, date } = location.state || {};
+<<<<<<< HEAD
   const [isProcessing, setIsProcessing] = useState(true);
+=======
+  
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [transcription, setTranscription] = useState("");
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
   // Simulate transcription process
   React.useEffect(() => {
@@ -26,6 +35,7 @@ const Transcription = () => {
     navigate("/app");
   };
 
+<<<<<<< HEAD
   const handleCopyText = () => {
     // Copy functionality will be implemented later
     alert("Copy functionality will be implemented!");
@@ -40,6 +50,59 @@ const Transcription = () => {
       <header className="bg-black p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
         <img src={logo} alt="Dispatch Vox Logo" className="w-40 h-15" />
+=======
+  // Ambil transkripsi dari backend setelah halaman dimuat
+  useEffect(() => {
+    const fetchTranscription = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/getTranscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName }) // Kirim nama file ke backend
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          setTranscription(data.transcription); // Simpan hasil transkripsi
+        } else {
+          setTranscription("Error fetching transcription");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setTranscription("Failed to fetch transcription");
+      } finally {
+        setIsProcessing(false); // Matikan loading
+      }
+    };
+
+    if (fileName) fetchTranscription();
+  }, [fileName]);
+
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(transcription);
+    alert("Transcription copied to clipboard!");
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
+      {/* Header Bar - Matching Home Page */}
+      <header className="bg-black p-4 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <svg
+            className="w-6 h-6 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
+            />
+          </svg>
+          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
         </div>
         <button
           onClick={handleLogout}
@@ -98,7 +161,11 @@ const Transcription = () => {
             </div>
           ) : (
             <div className="min-h-[400px] flex items-center justify-center">
+<<<<<<< HEAD
               <p className="text-white/60">Transcription will appear here</p>
+=======
+              <p className="text-white/60">{transcription || "No transcription available"}</p>
+>>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
             </div>
           )}
         </div>
