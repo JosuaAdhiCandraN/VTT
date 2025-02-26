@@ -5,12 +5,10 @@ import api from "../axios";
 const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName, filePath, transcription, date } = location.state || {};
-  const [isProcessing, setIsProcessing] = useState(!transcription);
-  const [transcriptionText, setTranscriptionText] = useState(
-    transcription || ""
-  );
-  const [error, setError] = useState("");
+  const { fileName, duration, date } = location.state || {};
+  
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [transcription, setTranscription] = useState("");
 
   // Jika transcription tidak ada dari state, coba ambil dari API
   useEffect(() => {
@@ -60,16 +58,36 @@ const Transcription = () => {
     navigate("/app");
   };
 
-  const handleCopyText = () => {
-    if (!transcriptionText) {
-      alert("Tidak ada teks untuk disalin");
-      return;
-    }
+  // Ambil transkripsi dari backend setelah halaman dimuat
+  useEffect(() => {
+    const fetchTranscription = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/getTranscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName }) // Kirim nama file ke backend
+        });
 
-    navigator.clipboard
-      .writeText(transcriptionText)
-      .then(() => alert("Teks berhasil disalin!"))
-      .catch((err) => alert("Gagal menyalin teks: " + err));
+        const data = await response.json();
+        if (response.ok) {
+          setTranscription(data.transcription); // Simpan hasil transkripsi
+        } else {
+          setTranscription("Error fetching transcription");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setTranscription("Failed to fetch transcription");
+      } finally {
+        setIsProcessing(false); // Matikan loading
+      }
+    };
+
+    if (fileName) fetchTranscription();
+  }, [fileName]);
+
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(transcription);
+    alert("Transcription copied to clipboard!");
   };
 
   return (
@@ -169,7 +187,7 @@ const Transcription = () => {
             </div>
           ) : (
             <div className="min-h-[400px] flex items-center justify-center">
-              <p className="text-white/60">Tidak ada hasil transkripsi</p>
+              <p className="text-white/60">{transcription || "No transcription available"}</p>
             </div>
           )}
         </div>
