@@ -37,11 +37,7 @@ const registerUser = async (req, res) => {
     user = new User({
       username: req.body.username,
       password: hashedPassword,
-<<<<<<< HEAD
       role:req.body.role,
-=======
-      role: req.body.role,
->>>>>>> 9cf3d76c31b7edf61ecb6a785e81a436ad21196c
     });
     await user.save();
 
