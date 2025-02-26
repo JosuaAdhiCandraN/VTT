@@ -4,10 +4,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Lato', 'sans-serif'], 
+        sans: ["Inter", "Lato", "sans-serif"], // Added "Inter" before "Lato"
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
+        "gradient-radial": "radial-gradient(circle, var(--tw-gradient-stops))",
       },
     },
   },
