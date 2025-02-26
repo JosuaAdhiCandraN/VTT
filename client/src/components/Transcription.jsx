@@ -5,7 +5,9 @@ const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { fileName, duration, date } = location.state || {};
+  
   const [isProcessing, setIsProcessing] = useState(true);
+  const [transcription, setTranscription] = useState("");
 
   // Simulate transcription process
   React.useEffect(() => {
@@ -24,9 +26,36 @@ const Transcription = () => {
     navigate("/app");
   };
 
+  // Ambil transkripsi dari backend setelah halaman dimuat
+  useEffect(() => {
+    const fetchTranscription = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/getTranscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName }) // Kirim nama file ke backend
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          setTranscription(data.transcription); // Simpan hasil transkripsi
+        } else {
+          setTranscription("Error fetching transcription");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setTranscription("Failed to fetch transcription");
+      } finally {
+        setIsProcessing(false); // Matikan loading
+      }
+    };
+
+    if (fileName) fetchTranscription();
+  }, [fileName]);
+
   const handleCopyText = () => {
-    // Copy functionality will be implemented later
-    alert("Copy functionality will be implemented!");
+    navigator.clipboard.writeText(transcription);
+    alert("Transcription copied to clipboard!");
   };
 
   return (
@@ -106,7 +135,7 @@ const Transcription = () => {
             </div>
           ) : (
             <div className="min-h-[400px] flex items-center justify-center">
-              <p className="text-white/60">Transcription will appear here</p>
+              <p className="text-white/60">{transcription || "No transcription available"}</p>
             </div>
           )}
         </div>
