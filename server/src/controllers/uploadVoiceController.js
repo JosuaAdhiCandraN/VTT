@@ -18,6 +18,14 @@ const uploadAudio = (req, res) => {
       console.error(`Error in Python script: ${stderr}`);
       return res.status(500).json({ error: "Transcription failed" });
     }
+  // Setelah transkripsi berhasil, hapus file audio
+  fs.unlink(audioFilePath, (err) => {
+    if (err) {
+      console.error(`Error deleting file: ${err}`);
+    } else {
+      console.log(`File ${audioFilePath} deleted successfully.`);
+    }
+  });
 
     res.json({
       message: "File uploaded and transcribed successfully",
