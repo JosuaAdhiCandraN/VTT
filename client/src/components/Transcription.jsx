@@ -1,19 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import api from "../axios";
 
 const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName, duration, date } = location.state || {};
-  const [isProcessing, setIsProcessing] = useState(true);
+  const { fileName, filePath, transcription, date } = location.state || {};
+  const [isProcessing, setIsProcessing] = useState(!transcription);
+  const [transcriptionText, setTranscriptionText] = useState(
+    transcription || ""
+  );
+  const [error, setError] = useState("");
 
-  // Simulate transcription process
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
+  // Jika transcription tidak ada dari state, coba ambil dari API
+  useEffect(() => {
+    // Hanya jalankan jika transcription tidak disediakan dan filePath ada
+    if (!transcription && filePath) {
+      const fetchTranscription = async () => {
+        try {
+          // Alternatif endpoint jika perlu mengambil transkripsi secara terpisah
+          const response = await api.get(
+            `/api/audio/transcription?filePath=${encodeURIComponent(filePath)}`
+          );
+
+          if (response.data && response.data.transcription) {
+            setTranscriptionText(response.data.transcription);
+          } else {
+            setError("Tidak ada hasil transkripsi yang ditemukan");
+          }
+        } catch (error) {
+          console.error("Error fetching transcription:", error);
+          setError(
+            "Gagal mengambil transkripsi: " +
+              (error.response?.data?.message || error.message)
+          );
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      fetchTranscription();
+    } else if (transcription) {
+      // Jika sudah ada transcription dari state, langsung tampilkan
+      setTranscriptionText(transcription);
       setIsProcessing(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    } else {
+      // Jika tidak ada filePath atau transcription
+      setError("Data file tidak lengkap");
+      setIsProcessing(false);
+    }
+  }, [transcription, filePath]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,13 +61,20 @@ const Transcription = () => {
   };
 
   const handleCopyText = () => {
-    // Copy functionality will be implemented later
-    alert("Copy functionality will be implemented!");
+    if (!transcriptionText) {
+      alert("Tidak ada teks untuk disalin");
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(transcriptionText)
+      .then(() => alert("Teks berhasil disalin!"))
+      .catch((err) => alert("Gagal menyalin teks: " + err));
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
-      {/* Header Bar - Matching Home Page */}
+      {/* Header Bar */}
       <header className="bg-black p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <svg
@@ -61,16 +104,20 @@ const Transcription = () => {
       <div className="container mx-auto p-8 max-w-4xl">
         {/* File Info Card */}
         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 mb-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <h2 className="text-xl font-semibold text-white">{fileName}</h2>
-              <span className="text-white/80">{duration}</span>
-              <span className="text-white/80">{date}</span>
+          <div className="flex justify-between items-center flex-wrap">
+            <div className="flex items-center space-x-4 mb-2 md:mb-0">
+              <h2 className="text-xl font-semibold text-white">
+                {fileName || "File tidak diketahui"}
+              </h2>
+              <span className="text-white/80">
+                {date || "Tanggal tidak diketahui"}
+              </span>
             </div>
             <div className="flex gap-4">
               <button
                 onClick={handleCopyText}
-                className="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900 flex items-center gap-2"
+                className="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900 flex items-center gap-2 disabled:bg-blue-900/50 disabled:cursor-not-allowed"
+                disabled={!transcriptionText || isProcessing}
               >
                 <svg
                   className="w-5 h-5"
@@ -91,22 +138,38 @@ const Transcription = () => {
                 onClick={handleNewUpload}
                 className="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900"
               >
-                New Upload
+                Upload Baru
               </button>
             </div>
           </div>
         </div>
 
-        {/* Empty Transcription Card */}
+        {/* Transcription Card */}
         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
           {isProcessing ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-              <p className="text-white">Processing your audio file...</p>
+              <p className="text-white">Memproses file audio...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-400">{error}</p>
+              <button
+                onClick={handleNewUpload}
+                className="mt-4 bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-900"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          ) : transcriptionText ? (
+            <div className="min-h-[400px] p-4 overflow-y-auto">
+              <p className="text-white whitespace-pre-wrap">
+                {transcriptionText}
+              </p>
             </div>
           ) : (
             <div className="min-h-[400px] flex items-center justify-center">
-              <p className="text-white/60">Transcription will appear here</p>
+              <p className="text-white/60">Tidak ada hasil transkripsi</p>
             </div>
           )}
         </div>

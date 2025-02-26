@@ -40,24 +40,28 @@ const Home = () => {
     const formData = new FormData();
     formData.append("audio", audio);
 
-  try {
-    const res = await api.post("/api/audio/upload", formData,
-      {
+    try {
+      const res = await api.post("/api/audio/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    setIsUploading(false);
+      });
 
+      setIsUploading(false);
+
+      // Sekarang mengambil transcription dari respons
       navigate("/transcription", {
         state: {
           fileName: audio.name,
-          filePath: res.data.filePath,
+          filePath: res.data.filename, // Filename dari respons backend
+          transcription: res.data.transcription, // Hasil transkripsi dari respons backend
           date: new Date().toLocaleString(),
         },
       });
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
-      alert("Gagal mengunggah audio.");
+      alert(
+        "Gagal mengunggah audio: " +
+          (error.response?.data?.error || error.message)
+      );
       setIsUploading(false);
     }
   };
@@ -65,7 +69,22 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">
       <header className="bg-black p-4 flex justify-between items-center">
-        <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+        <div className="flex items-center space-x-2">
+          <svg
+            className="w-6 h-6 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
+            />
+          </svg>
+          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+        </div>
         <button
           onClick={handleLogout}
           className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
