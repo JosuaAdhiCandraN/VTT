@@ -8,11 +8,8 @@ import {
   Share2,
   Target,
 } from "lucide-react";
-<<<<<<< HEAD
 import bgImage from "../assets/BG_HomeClient.png"; 
 import logo from "../assets/Logo.png"; 
-=======
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -22,7 +19,6 @@ const Welcome = () => {
   };
 
   return (
-<<<<<<< HEAD
     <div
     className="min-h-screen bg-cover bg-center"
     style={{ backgroundImage: `url(${bgImage})` }}
@@ -103,107 +99,11 @@ const Welcome = () => {
             </div>
           </div>
         </div>
-=======
-    <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950 text-white flex flex-col">
-      {/* Header - Matched with admin dashboard */}
-      <header className="bg-black p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <svg
-            className="w-6 h-6 text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
-            />
-          </svg>
-          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
-        </div>
-        <button
-          onClick={handleNavigation}
-          className="bg-white text-black px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
-        >
-          SIGN IN
-        </button>
-      </header>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Left Column */}
-          <div className="space-y-6">
-            <h1 className="text-6xl font-bold leading-tight">
-              No More
-              <br />
-              Missed
-              <br />
-              Details —
-            </h1>
-            <p className="text-3xl text-gray-300">
-              Every Call, Captured in Text.
-            </p>
-            <button
-              onClick={handleNavigation}
-              className="bg-black text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center hover:bg-opacity-90 transition-colors"
-            >
-              Get Started →
-            </button>
-          </div>
-
-          {/* Rest of the component remains the same */}
-          {/* Right Column - Steps Card */}
-          <div className="bg-blue-900/50 p-8 rounded-3xl backdrop-blur-sm border border-white/10">
-            <h2 className="text-2xl font-bold mb-12 text-center">
-              Generate in 2 Simple Steps
-            </h2>
-            <div className="flex items-center justify-between gap-4">
-              {[
-                {
-                  number: "1",
-                  icon: ArrowUpFromLine,
-                  text: ["Upload", "Your", "File"],
-                },
-                {
-                  number: "2",
-                  icon: Clock,
-                  text: ["Let Us", "Do The", "Work"],
-                },
-              ].map((step, index, array) => (
-                <React.Fragment key={index}>
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                      <step.icon className="w-8 h-8 text-blue-900" />
-                    </div>
-                    <div className="text-center">
-                      {step.text.map((line, i) => (
-                        <div key={i} className="text-sm font-medium">
-                          {line}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {index < array.length - 1 && (
-                    <div className="w-16 h-0.5 bg-white/50 mt-[-20px]" />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
       </div>
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
-<<<<<<< HEAD
         <h2 className="text-4xl font-bold text-center mb-12 text-white">
-=======
-        <h2 className="text-4xl font-bold text-center mb-12">
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
           Why DispatchVox?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">

@@ -1,22 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-<<<<<<< HEAD
-import logo from "../assets/Logo.png"; 
-import bgImage from "../assets/BG_MainClient.png"; 
-=======
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
 const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { fileName, duration, date } = location.state || {};
-<<<<<<< HEAD
   const [isProcessing, setIsProcessing] = useState(true);
-=======
-  
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [transcription, setTranscription] = useState("");
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
 
   // Simulate transcription process
   React.useEffect(() => {
@@ -35,22 +24,6 @@ const Transcription = () => {
     navigate("/app");
   };
 
-<<<<<<< HEAD
-  const handleCopyText = () => {
-    // Copy functionality will be implemented later
-    alert("Copy functionality will be implemented!");
-  };
-
-  return (
-    <div
-    className="min-h-screen bg-cover bg-center"
-    style={{ backgroundImage: `url(${bgImage})` }}
-  >
-      {/* Header Bar - Matching Home Page */}
-      <header className="bg-black p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-        <img src={logo} alt="Dispatch Vox Logo" className="w-40 h-15" />
-=======
   // Ambil transkripsi dari backend setelah halaman dimuat
   useEffect(() => {
     const fetchTranscription = async () => {
@@ -102,7 +75,6 @@ const Transcription = () => {
             />
           </svg>
           <span className="text-white font-bold text-xl">DISPATCH VOX</span>
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
         </div>
         <button
           onClick={handleLogout}
@@ -161,11 +133,7 @@ const Transcription = () => {
             </div>
           ) : (
             <div className="min-h-[400px] flex items-center justify-center">
-<<<<<<< HEAD
-              <p className="text-white/60">Transcription will appear here</p>
-=======
               <p className="text-white/60">{transcription || "No transcription available"}</p>
->>>>>>> b2329f183aca1c5311eef1082904f2e434b05909
             </div>
           )}
         </div>
