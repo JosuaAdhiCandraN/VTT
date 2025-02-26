@@ -71,7 +71,7 @@ const Welcome = () => {
           {/* Right Column - Steps Card */}
           <div className="bg-blue-900/50 p-8 rounded-3xl backdrop-blur-sm border border-white/10">
             <h2 className="text-2xl font-bold mb-12 text-center">
-              Generate in 3 Simple Steps
+              Generate in 2 Simple Steps
             </h2>
             <div className="flex items-center justify-between gap-4">
               {[
@@ -84,11 +84,6 @@ const Welcome = () => {
                   number: "2",
                   icon: Clock,
                   text: ["Let Us", "Do The", "Work"],
-                },
-                {
-                  number: "3",
-                  icon: MessageCircle,
-                  text: ["Check", "Your", "WhatsApp"],
                 },
               ].map((step, index, array) => (
                 <React.Fragment key={index}>
