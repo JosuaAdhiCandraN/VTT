@@ -40,16 +40,13 @@ const Home = () => {
     const formData = new FormData();
     formData.append("audio", audio);
 
-    try {
-      const res = await api.post(
-        "/api/audio/upload", // Sesuaikan dengan route backend
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      setIsUploading(false);
+  try {
+    const res = await api.post("/api/audio/upload", formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    setIsUploading(false);
 
       navigate("/transcription", {
         state: {
