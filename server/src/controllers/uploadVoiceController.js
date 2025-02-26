@@ -1,41 +1,28 @@
-const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const { exec } = require("child_process");
 
-// Fungsi untuk menangani unggahan file dan transkripsi
+// Fungsi untuk menangani unggahan file
 const uploadAudio = (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  const audioPath = req.file.path;
-  console.log(`Processing audio: ${audioPath}`);
+  const audioFilePath = path.join(__dirname, "../../temp", req.file.filename); // Pastikan path benar
+  const transcribeScript = path.join(__dirname, "../transcribe.py"); // Path ke transcribe.py
 
-  // Jalankan skrip Python untuk transkripsi
-  const pythonProcess = spawn("python", ["transcribe.py", audioPath]);
+  console.log(`Processing audio: ${audioFilePath}`);
 
-  let transcription = "";
-
-  pythonProcess.stdout.on("data", (data) => {
-    transcription += data.toString();
-  });
-
-  pythonProcess.stderr.on("data", (data) => {
-    console.error(`Error in Python script: ${data}`);
-  });
-
-  pythonProcess.on("close", (code) => {
-    if (code !== 0) {
-      return res.status(500).json({ error: "Error processing audio" });
+  exec(`python "${transcribeScript}" "${audioFilePath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error in Python script: ${stderr}`);
+      return res.status(500).json({ error: "Transcription failed" });
     }
-
-    console.log("Transcription completed:", transcription);
-    fs.unlinkSync(audioPath); // Hapus file setelah diproses
 
     res.json({
       message: "File uploaded and transcribed successfully",
       filename: req.file.filename,
-      transcription: transcription.trim(),
+      transcription: stdout.trim(), // Hasil transkripsi
     });
   });
 };
