@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../axios";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -9,61 +9,61 @@ const Home = () => {
 
   const handleLogout = async () => {
     try {
-        const response = await fetch("http://localhost:5000/api/auth/logout", {
-            method: "POST",
-            credentials: "include"
-        });
+      const response = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
 
-        if (response.ok) {
-            window.location.href = "/login"; 
-        } else {
-            const data = await response.json();
-            alert(data.message || "Logout failed");
-        }
-    } catch (error) {
-        console.error("Logout error:", error);
-        alert("An error occurred. Please try again.");
-    }
-};
-
-const handleFileChange = (event) => {
-  setAudio(event.target.files[0]);
-};
-
-
-const handleUpload = async () => {
-  if (!audio) {
-    alert("Pilih file audio terlebih dahulu!");
-    return;
-  }
-
-  setIsUploading(true);
-  const formData = new FormData();
-  formData.append("audio", audio);
-
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/audio/upload", // Sesuaikan dengan route backend
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
+      if (response.ok) {
+        window.location.href = "/login";
+      } else {
+        const data = await response.json();
+        alert(data.message || "Logout failed");
       }
-    );
-    setIsUploading(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
 
-    navigate("/transcription", {
-      state: {
-        fileName: audio.name,
-        filePath: res.data.filePath,
-        date: new Date().toLocaleString(),
-      },
-    });
-  } catch (error) {
-    console.error("Error:", error.response ? error.response.data : error);
-    alert("Gagal mengunggah audio.");
-    setIsUploading(false);
-  }
-};
+  const handleFileChange = (event) => {
+    setAudio(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!audio) {
+      alert("Pilih file audio terlebih dahulu!");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("audio", audio);
+
+    try {
+      const res = await api.post(
+        "/api/audio/upload", // Sesuaikan dengan route backend
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      setIsUploading(false);
+
+      navigate("/transcription", {
+        state: {
+          fileName: audio.name,
+          filePath: res.data.filePath,
+          date: new Date().toLocaleString(),
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error.response ? error.response.data : error);
+      alert("Gagal mengunggah audio.");
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-950 to-indigo-950">

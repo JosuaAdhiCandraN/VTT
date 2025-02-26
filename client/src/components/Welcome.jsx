@@ -1,4 +1,5 @@
 import React from "react";
+
 import { useNavigate } from "react-router-dom";
 import {
   ArrowUpFromLine,
@@ -34,7 +35,7 @@ const Welcome = () => {
               d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
             />
           </svg>
-          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+          <span className="text-white font-bold text-xl">DISPATCH FOX</span>
         </div>
         <button
           onClick={handleNavigation}
@@ -112,7 +113,7 @@ const Welcome = () => {
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-center mb-12">
-          Why DispatchVox?
+          Why DispatchFox?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
