@@ -17,12 +17,7 @@ const corsOptions = {
     "http://localhost:5000", // Backend dev environment
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Access-Control-Allow-Credentials",
-  ],
+  credentials: true
 };
 
 // Middleware
@@ -41,12 +36,12 @@ app.use(morgan("dev"));
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
 const authRoutes = require("./src/routes/AuthRoute");
-const audioRoutes = require("./src/routes/transcribeRoute");
+const uploadRoutes = require("./src/routes/uploadRoute"); 
 
 // User routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/audio", audioRoutes);
+app.use("/api/audio", uploadRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

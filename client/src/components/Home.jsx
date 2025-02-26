@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../axios";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -42,9 +42,7 @@ const handleUpload = async () => {
   formData.append("audio", audio);
 
   try {
-    const res = await axios.post(
-      "http://localhost:5000/api/audio/upload", // Sesuaikan dengan route backend
-      formData,
+    const res = await api.post("/api/audio/upload", formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
       }
