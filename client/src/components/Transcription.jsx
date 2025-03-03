@@ -21,9 +21,11 @@ const Transcription = () => {
     if (!transcription && fileName) {
       const fetchTranscription = async () => {
         try {
-          const response = await api.get(
-            `/api/audio/transcription?filePath=${encodeURIComponent(fileName)}`
-          );
+          const response = await fetch("http://localhost:8001/transcribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fileName }), // Kirim nama file ke backend
+          });
           if (response.data && response.data.transcription) {
             setTranscriptionText(response.data.transcription);
           } else {

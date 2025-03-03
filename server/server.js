@@ -15,6 +15,7 @@ const corsOptions = {
   origin: [
     "http://localhost:3000", // Frontend dev environment
     "http://localhost:5000", // Backend dev environment
+    "http://localhost:8001", // Backend prod environment
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
@@ -37,26 +38,13 @@ app.use(morgan("dev"));
 const userRoutes = require("./src/routes/UserRoutes");
 const authRoutes = require("./src/routes/AuthRoute");
 const uploadRoutes = require("./src/routes/uploadRoute"); 
+const transcriptionRoutes = require("./src/routes/transcriptionRoute");
 
 // User routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/audio", uploadRoutes);
-
-app.post("/getTranscription", async (req, res) => {
-  const { fileName } = req.body;
-
-  try {
-    // Baca transkripsi dari file atau database
-    const transcription = await fs.promises.readFile(`./transcripts/${fileName}.txt`, "utf8");
-    
-    res.json({ transcription });
-  } catch (error) {
-    console.error("Error fetching transcription:", error);
-    res.status(500).json({ error: "Failed to retrieve transcription" });
-  }
-});
-
+app.use("/api/transcription", transcriptionRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

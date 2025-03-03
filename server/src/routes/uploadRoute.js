@@ -17,7 +17,4 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Route untuk mengunggah dan langsung transkripsi audio
-router.post("/upload", upload.single("audio"), uploadAudio);
-
 module.exports = router;
