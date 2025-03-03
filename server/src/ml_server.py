@@ -78,9 +78,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
 
-def classify_text(text):
+def classify_text(transcription):
     """Klasifikasikan teks menggunakan model TensorFlow/Keras."""
-    sequence = tokenizer.texts_to_sequences([text])
+    sequence = tokenizer.texts_to_sequences([transcription])
     padded = pad_sequences(sequence, maxlen=10, padding="post", truncating="post")
     prediction = classification_model.predict(padded)
     label_index = np.argmax(prediction)
