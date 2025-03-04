@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { uploadAudio } from "../axios";
 import api from "../axios";
 import logo from "../assets/Logo.png";
 import bgImage from "../assets/BG_MainClient.png";
@@ -41,35 +42,42 @@ const Home = () => {
       alert("Pilih file audio terlebih dahulu!");
       return;
     }
-
+    
     setIsUploading(true);
     const formData = new FormData();
     formData.append("audio", audio);
-
+    
     try {
-      const res = await api.post("/api/audio/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setIsUploading(false);
-
+      const res = await uploadAudio(formData); // Pakai fungsi dari api.js
+      console.log("Server Response:", res.data);
+      
+      // Navigasi ke halaman hasil transkripsi (hanya sekali)
       navigate("/transcription", {
         state: {
           fileName: audio.name,
           transcription: res.data.transcription,
+          label: res.data.label,
           date: new Date().toLocaleString(),
         },
       });
+      
+      setIsUploading(false);
     } catch (error) {
-      console.error("Error:", error.response ? error.response.data : error);
-      alert(
-        "Gagal mengunggah audio: " +
-          (error.response?.data?.error || error.message)
-      );
+      console.error("Error:", error);
+      
+      // Tampilkan pesan error yang lebih spesifik
+      let errorMessage = "Gagal mengunggah audio";
+      
+      if (error.response && error.response.data) {
+        errorMessage += ": " + (error.response.data.error || error.message);
+      } else if (error.message) {
+        errorMessage += ": " + error.message;
+      }
+      
+      alert(errorMessage);
       setIsUploading(false);
     }
   };
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -105,10 +113,10 @@ const Home = () => {
 
   // Function to handle sliding to previous or next tab
   const slideTab = (direction) => {
-    if (direction === 'next') {
-      setActiveTab(activeTab === 'upload' ? 'record' : 'upload');
+    if (direction === "next") {
+      setActiveTab(activeTab === "upload" ? "record" : "upload");
     } else {
-      setActiveTab(activeTab === 'upload' ? 'record' : 'upload');
+      setActiveTab(activeTab === "upload" ? "record" : "upload");
     }
   };
 
@@ -140,7 +148,7 @@ const Home = () => {
               transform: `translateX(${
                 activeTab === "upload" ? "0%" : "-50%"
               })`,
-              width: '200%' // Make sure it has room for both cards
+              width: "200%", // Make sure it has room for both cards
             }}
           >
             {/* Upload Card */}
@@ -165,7 +173,9 @@ const Home = () => {
                 <button
                   onClick={handleUpload}
                   className={`mt-4 px-6 py-3 rounded-lg text-white ${
-                    isUploading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+                    isUploading
+                      ? "bg-gray-500"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
                   disabled={isUploading}
                 >
@@ -174,7 +184,7 @@ const Home = () => {
 
                 <div className="mt-6 flex justify-center">
                   <button
-                    onClick={() => slideTab('next')}
+                    onClick={() => slideTab("next")}
                     className="text-white text-sm flex items-center hover:text-blue-300 transition-colors"
                   >
                     <span>Geser untuk merekam</span>
@@ -261,7 +271,7 @@ const Home = () => {
 
                 <div className="mt-6 flex justify-center">
                   <button
-                    onClick={() => slideTab('prev')}
+                    onClick={() => slideTab("prev")}
                     className="text-white text-sm flex items-center hover:text-blue-300 transition-colors"
                   >
                     <svg
