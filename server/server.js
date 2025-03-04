@@ -18,7 +18,7 @@ const corsOptions = {
     "http://localhost:8001", // Backend prod environment
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
+  credentials: true,
 };
 
 // Middleware
@@ -37,7 +37,7 @@ app.use(morgan("dev"));
 // import routes
 const userRoutes = require("./src/routes/UserRoutes");
 const authRoutes = require("./src/routes/AuthRoute");
-const uploadRoutes = require("./src/routes/uploadRoute"); 
+const uploadRoutes = require("./src/routes/uploadRoute");
 const transcriptionRoutes = require("./src/routes/transcriptionRoute");
 
 // User routes

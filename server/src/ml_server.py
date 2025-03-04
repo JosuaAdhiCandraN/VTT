@@ -32,19 +32,34 @@ with open("tokenizer.pkl", "rb") as f:
 with open("label_encoder.pkl", "rb") as f:
     label_encoder = pickle.load(f)
 
+FFMPEG_PATH = "D:/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe"
+
 def convert_mp3_to_wav(mp3_path):
     """Konversi MP3 ke WAV menggunakan FFmpeg"""
+    if not os.path.exists(mp3_path):
+        raise FileNotFoundError(f"File MP3 tidak ditemukan: {mp3_path}")
+
     wav_path = mp3_path.replace(".mp3", ".wav")
-    command = ["ffmpeg", "-i", mp3_path, "-ar", "16000", "-ac", "1", wav_path, "-y"]
-    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    command = [FFMPEG_PATH, "-i", mp3_path, "-ar", "16000", "-ac", "1", wav_path, "-y"]
+    
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"FFmpeg error: {result.stderr}")
+
+    if not os.path.exists(wav_path):
+        raise FileNotFoundError(f"File WAV tidak ditemukan setelah konversi: {wav_path}")
+
     return wav_path
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
     """Menerima file audio, melakukan transkripsi, lalu mengirim hasil ke Express.js."""
-
+    
     if not file.filename:
         raise HTTPException(status_code=400, detail="File tidak valid.")
+
+    wav_path = None  # Inisialisasi agar tidak terjadi UnboundLocalError
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
         shutil.copyfileobj(file.file, temp_audio)
@@ -97,7 +112,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     finally:    
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
-        if os.path.exists(wav_path):
+        if wav_path and os.path.exists(wav_path):  # Pastikan wav_path sudah dibuat
             os.remove(wav_path)
 
 def classify_text(transcription):

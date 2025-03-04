@@ -7,6 +7,7 @@ import bgImage from "../assets/BG_MainClient.png";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [responseMessage, setResponseMessage] = useState("");
   const [audio, setAudio] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -42,38 +43,37 @@ const Home = () => {
       alert("Pilih file audio terlebih dahulu!");
       return;
     }
-    
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append("audio", audio);
-    
+
     try {
-      const res = await uploadAudio(formData); // Pakai fungsi dari api.js
-      console.log("Server Response:", res.data);
-      
-      // Navigasi ke halaman hasil transkripsi (hanya sekali)
-      navigate("/transcription", {
-        state: {
-          fileName: audio.name,
-          transcription: res.data.transcription,
-          label: res.data.label,
-          date: new Date().toLocaleString(),
-        },
+      const response = await fetch("http://localhost:5000/api/audio/upload", {
+        method: "POST",
+        body: formData,
       });
-      
-      setIsUploading(false);
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResponseMessage(
+        `Transcription: ${data.transcription}, Label: ${data.label}`
+      );
     } catch (error) {
       console.error("Error:", error);
-      
+
       // Tampilkan pesan error yang lebih spesifik
       let errorMessage = "Gagal mengunggah audio";
-      
+
       if (error.response && error.response.data) {
         errorMessage += ": " + (error.response.data.error || error.message);
       } else if (error.message) {
         errorMessage += ": " + error.message;
       }
-      
+
       alert(errorMessage);
       setIsUploading(false);
     }
