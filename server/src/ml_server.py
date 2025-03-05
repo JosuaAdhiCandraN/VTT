@@ -7,14 +7,11 @@ import os
 import pickle
 import numpy as np
 import subprocess
-import httpx
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = FastAPI()
-
-EXPRESS_API_URL = "http://localhost:5000/api/transcription/save"
 
 # Load Whisper model
 whisper_model_name = "openai/whisper-small"
