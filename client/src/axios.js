@@ -1,11 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000', // Ubah ke http:// jika belum mengonfigurasi HTTPS di localhost
+  baseURL: "http://localhost:5000", // Sesuaikan dengan backend Express.js
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  }
 });
+
+// Fungsi untuk upload file audio
+export const uploadAudio = (formData) => {
+  return axios.post("http://localhost:5000/api/audio/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
 
 export default api;

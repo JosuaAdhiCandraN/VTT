@@ -1,7 +1,10 @@
+//login
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
+import logo from "../assets/Logo.png";
+import bgImage from "../assets/BG_LoginClient.gif";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -56,7 +59,10 @@ const Login = () => {
 
   // Rest of your existing Login component code remains the same
   return (
-    <div className="min-h-screen bg-[#020B2C] relative">
+    <div
+      className="min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       {/* Back button with navigation */}
       <button
         onClick={handleBack}
@@ -80,17 +86,16 @@ const Login = () => {
       <div className="min-h-screen flex items-center pl-48">
         <div className="relative w-full max-w-md">
           {/* Main card */}
-          <div className="bg-[#091544] rounded-3xl p-8 shadow-xl">
+          <div className="bg-[#091544] rounded-3xl p-8 shadow-xl border-2 border-white">
             {/* Logo */}
             <div className="mb-8">
-              <div className="text-white/80 flex items-center gap-1 text-sm">
-                <span>DISPATCH</span>
-                <span>VOX</span>
+              <div className="flex items-center space-x-2">
+                <img src={logo} alt="Dispatch Vox Logo" className="w-40 h-15" />
               </div>
             </div>
 
             {/* Sign in text */}
-            <h1 className="text-4xl font-bold text-white mb-8">Sign in</h1>
+            <h1 className="text-4xl font-bold text-white mb-8">Sign In</h1>
 
             <form onSubmit={handleLogin} className="space-y-6">
               {/* Username field */}
@@ -172,12 +177,14 @@ const Login = () => {
               </div>
 
               {/* Sign in button */}
-              <button
-                type="submit"
-                className="w-full bg-white text-[#091544] py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors"
-              >
-                SIGN IN
-              </button>
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="bg-white text-[#091544] py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors h-15 w-20"
+                >
+                  SIGN IN
+                </button>
+              </div>
             </form>
           </div>
         </div>

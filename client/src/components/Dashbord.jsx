@@ -1,6 +1,9 @@
+//dashboard
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/Logo.png";
+import bgImage from "../assets/BG_Admin.png";
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -128,20 +131,7 @@ const Dashboard = () => {
       {/* Header Bar */}
       <header className="bg-black p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <svg
-            className="w-6 h-6 text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M4.93 19.07a9 9 0 010-12.728m2.828 9.9a5 5 0 010-7.072"
-            />
-          </svg>
-          <span className="text-white font-bold text-xl">DISPATCH VOX</span>
+          <img src={logo} alt="Dispatch Vox Logo" className="w-40 h-15" />
         </div>
         <button
           onClick={() => handleLogout()}
