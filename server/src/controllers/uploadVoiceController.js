@@ -9,12 +9,14 @@ const uploadAudio = async (req, res) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
+  console.log("Received file:", req.file); // Debugging
+
   const audioFilePath = path.join(__dirname, "../../temp", req.file.filename);
 
   try {
     const formData = new FormData();
     formData.append("file", fs.createReadStream(audioFilePath), {
-      filename: req.file.filename,
+      filename: req.file.originalname, // Pakai originalname biar lebih jelas
       contentType: req.file.mimetype,
     });
 
@@ -35,7 +37,7 @@ const uploadAudio = async (req, res) => {
 
     res.json({
       message: "File uploaded and transcribed successfully",
-      filename: req.file.filename,
+      filename: req.file.originalname,
       transcription: responseData.transcription,
       label: responseData.label,
     });
