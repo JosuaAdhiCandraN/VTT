@@ -43,17 +43,17 @@ const Home = () => {
       alert("Pilih file audio terlebih dahulu!");
       return;
     }
-
+  
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("audio", audio);
-
+    formData.append("audio", audio);  // <== Nama field "audio"
+  
     try {
       const response = await fetch("http://localhost:5000/api/audio/upload", {
         method: "POST",
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
