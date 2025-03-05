@@ -52,7 +52,8 @@ const handleUpload = async () => {
     navigate("/transcription", {
       state: {
         fileName: audio.name,
-        filePath: res.data.filePath,
+        transcription: res.data.transcription,
+        label: res.data.label,
         date: new Date().toLocaleString(),
       },
     });

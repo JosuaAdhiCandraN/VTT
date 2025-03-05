@@ -6,14 +6,13 @@ import shutil
 import os
 import pickle
 import numpy as np
-import httpx  # Import httpx untuk mengirim request ke Express.js
+import httpx
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = FastAPI()
 
-# URL Express.js untuk menyimpan ke MongoDB
 EXPRESS_API_URL = "http://localhost:5000/api/transcription/save"
 
 # Load Whisper model
@@ -62,9 +61,13 @@ async def transcribe_audio(file: UploadFile = File(...)):
         # Lakukan klasifikasi teks
         label = classify_text(transcription)
 
+        # Debugging
+        print(f"Transcription: {transcription}, Label: {label}")
+
         # Kirim hasil ke Express.js
         async with httpx.AsyncClient() as client:
             response = await client.post(EXPRESS_API_URL, json={
+                "file_name": file.filename,
                 "transcription": transcription,
                 "label": label
             })
@@ -74,7 +77,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-    finally:
+    finally:    
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
 
