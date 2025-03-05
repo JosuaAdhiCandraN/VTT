@@ -9,25 +9,25 @@ const uploadAudio = async (req, res) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
-  console.log("Received file:", req.file); // Debugging
-
   const audioFilePath = path.join(__dirname, "../../temp", req.file.filename);
 
   try {
-    // Buat FormData untuk mengirim file ke FastAPI
+    console.log("Received file from frontend:", req.file);
+
+    // *Gunakan fs.createReadStream() agar file dikirim dengan benar*
     const formData = new FormData();
     formData.append("file", fs.createReadStream(audioFilePath), {
-      filename: req.file.originalname, // Pakai originalname biar lebih jelas
+      filename: req.file.filename,
       contentType: req.file.mimetype,
     });
 
-    console.log("Sending request to FastAPI...");
+    console.log("Sending file to FastAPI...");
 
     // Kirim ke FastAPI
     const response = await fetch(FASTAPI_URL, {
       method: "POST",
       body: formData,
-      headers: formData.getHeaders(),
+      headers: formData.getHeaders(), // Pastikan header dikirim dengan benar
     });
 
     console.log("FastAPI Status:", response.status);
@@ -36,7 +36,7 @@ const uploadAudio = async (req, res) => {
     console.log("FastAPI Response:", responseData);
 
     if (!response.ok || !responseData) {
-      throw new Error(`FastAPI error: ${response.status}`);
+      throw new Error("FastAPI error: ${response.status}");
     }
 
     res.json({
@@ -46,14 +46,15 @@ const uploadAudio = async (req, res) => {
       label: responseData.label,
     });
 
-    // Hapus file setelah diproses
+    // *Hapus file setelah diproses*
     fs.unlink(audioFilePath, (err) => {
       if (err) console.error("Error deleting file:", err);
     });
-
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Transcription failed", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Transcription failed", details: error.message });
   }
 };
 
