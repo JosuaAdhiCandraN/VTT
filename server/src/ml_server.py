@@ -59,60 +59,58 @@ async def transcribe_audio(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="File tidak valid.")
 
-    wav_path = None  # Inisialisasi agar tidak terjadi UnboundLocalError
+    print(f"📂 Received file: {file.filename}, Type: {file.content_type}")
+
+    wav_path = None
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
         shutil.copyfileobj(file.file, temp_audio)
         temp_audio_path = temp_audio.name
 
     try:
-        # 🔹 Ubah MP3 ke WAV sebelum membaca audio
+        # Konversi MP3 ke WAV
+        print("Converting MP3 to WAV...")
         wav_path = convert_mp3_to_wav(temp_audio_path)
 
-        # 🔹 Load audio dengan torchaudio (lebih stabil daripada librosa)
+        # Load audio
+        print("Loading audio with torchaudio...")
         waveform, sample_rate = torchaudio.load(wav_path)
-        
-        # 🔹 Pastikan sample rate 16kHz
+
+        # Pastikan sample rate 16kHz
+        print(f"Original Sample Rate: {sample_rate}, Converting to 16kHz...")
         transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)
         waveform = transform(waveform)
         audio = waveform.numpy().flatten()
 
-        # 🔹 Transkripsi dengan Whisper
+        # Transkripsi dengan Whisper
+        print("Transcribing with Whisper...")
         input_features = processor(audio, sampling_rate=16000, return_tensors="pt").input_features.to(device)
         
         with torch.no_grad():
             forced_decoder_ids = processor.get_decoder_prompt_ids(language="id", task="transcribe")
             predicted_ids = whisper_model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=300)
-        
+
         transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 
-        # 🔹 Cek apakah hasil transkripsi kosong
         if not transcription.strip():
             raise HTTPException(status_code=500, detail="Gagal melakukan transkripsi (hasil kosong).")
 
-        # 🔹 Lakukan klasifikasi teks
+        # Klasifikasi teks
+        print("Classifying text...")
         label = classify_text(transcription)
 
-        # 🔹 Debugging log
         print(f"Transcription: {transcription}, Label: {label}")
 
-        # 🔹 Kirim hasil ke Express.js
-        async with httpx.AsyncClient() as client:
-            response = await client.post(EXPRESS_API_URL, json={
-                "file_name": file.filename,
-                "transcription": transcription,
-                "label": label
-            })
-
-        return {"transcription": transcription, "label": label, "express_status": response.status_code}
+        return {"transcription": transcription, "label": label}
 
     except Exception as e:
+        print(f"ERROR: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-    finally:    
+    finally:
         if os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
-        if wav_path and os.path.exists(wav_path):  # Pastikan wav_path sudah dibuat
+        if wav_path and os.path.exists(wav_path):
             os.remove(wav_path)
 
 def classify_text(transcription):
