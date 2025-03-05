@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const axios = require("axios");
 const FormData = require("form-data");
 
 const FASTAPI_URL = "http://localhost:8001/transcribe";
@@ -19,19 +18,30 @@ const uploadAudio = async (req, res) => {
       filename: req.file.filename,
       contentType: req.file.mimetype,
     });
-    
+
+    console.log("Sending request to FastAPI...");
+
+    // Kirim ke FastAPI
     const response = await fetch(FASTAPI_URL, {
       method: "POST",
       body: formData,
       headers: formData.getHeaders(),
     });
-    console.log("FastAPI Response in Express:", response.data);
+
+    console.log("FastAPI Status:", response.status);
+
+    const responseData = await response.json().catch(() => null);
+    console.log("FastAPI Response:", responseData);
+
+    if (!response.ok || !responseData) {
+      throw new Error(`FastAPI error: ${response.status}`);
+    }
 
     res.json({
       message: "File uploaded and transcribed successfully",
       filename: req.file.filename,
-      transcription: response.data.transcription,
-      label: response.data.label
+      transcription: responseData.transcription,
+      label: responseData.label,
     });
 
     // Hapus file setelah diproses
