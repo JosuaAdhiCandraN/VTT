@@ -1,265 +1,355 @@
-// Transcription.js
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import api from "../axios";
 import logo from "../assets/Logo.png";
 import bgImage from "../assets/BG_MainClient.png";
+import poldaLogo from "../assets/PoldaDIY.png";
 
 const Transcription = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName, transcription, date } = location.state || {};
+  const { fileName, transcription, date, label } = location.state || {};
 
   const [transcriptionText, setTranscriptionText] = useState(
     transcription || ""
   );
+  const [transcriptionLabel, setTranscriptionLabel] = useState(label || "");
   const [isProcessing, setIsProcessing] = useState(!transcription);
   const [error, setError] = useState("");
+  const [fileMetadata, setFileMetadata] = useState({
+    name: fileName || "",
+    date:
+      date ||
+      new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+  });
 
   useEffect(() => {
     if (!transcription && fileName) {
       const fetchTranscription = async () => {
+        setIsProcessing(true);
+        setError("");
         try {
           const response = await fetch("http://localhost:8001/transcribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fileName }), // Kirim nama file ke backend
+            body: JSON.stringify({ fileName }),
           });
-          if (response.data && response.data.transcription) {
-            setTranscriptionText(response.data.transcription);
+          const data = await response.json();
+
+          if (response.ok && data.transcription) {
+            setTranscriptionText(data.transcription);
+            setTranscriptionLabel(data.label || "");
+
+            // Update file metadata if available in response
+            // PERUBAHAN: Gunakan original_filename jika tersedia
+            if (data.original_filename || data.fileName) {
+              setFileMetadata((prev) => ({
+                ...prev,
+                name: data.original_filename || data.fileName || prev.name,
+              }));
+            }
+            // Kode untuk tanggal tetap sama
+            if (data.date) {
+              setFileMetadata((prev) => ({ ...prev, date: data.date }));
+            } else {
+              // If no date in response, use current date
+              setFileMetadata((prev) => ({
+                ...prev,
+                date: new Date().toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }),
+              }));
+            }
           } else {
-            setError("Tidak ada hasil transkripsi yang ditemukan");
+            setError(data.message || "Transkripsi tidak ditemukan.");
           }
         } catch (error) {
           console.error("Error fetching transcription:", error);
-          setError(
-            "Gagal mengambil transkripsi: " +
-              (error.response?.data?.message || error.message)
-          );
+          setError("Gagal mengambil transkripsi. Silakan coba lagi.");
         } finally {
           setIsProcessing(false);
         }
       };
       fetchTranscription();
+    } else {
+      // If we already have transcription, make sure we have date
+      if (!date) {
+        setFileMetadata((prev) => ({
+          ...prev,
+          date: new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+        }));
+      }
     }
-  }, [fileName, transcription]);
+  }, [fileName, transcription, date]);
 
   const handleDownloadPDF = () => {
-    // Ambil username dari data user yang login
-    const username = localStorage.getItem("username") || "User"; // Pastikan ada cara mendapatkan username
-    const currentDate = new Date().toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-
-    // Buat dokumen PDF dengan format A4
+    // Create PDF with professional settings
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
       format: "a4",
+      compress: true,
     });
-
-    // Tambahkan background subtle
-    doc.setFillColor(252, 252, 252);
-    doc.rect(0, 0, 210, 297, "F");
-
-    // Header dengan logo dan informasi Polda DIY
-    doc.setFillColor(35, 55, 96); // Warna biru tua untuk header
-    doc.rect(0, 0, 210, 40, "F");
-
-    // Logo Polda DIY
-    // Asumsikan logo sudah diimpor, jika tidak, gunakan placeholder
-    // Jika memungkinkan, ganti dengan logo resmi Polda DIY
-    const imgWidth = 30;
-    const imgHeight = 30;
-    doc.addImage(logo, "PNG", 15, 5, imgWidth, imgHeight);
-
-    // Judul institusi
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.text("KEPOLISIAN DAERAH ISTIMEWA YOGYAKARTA", 105, 15, {
-      align: "center",
-    });
-    doc.setFontSize(12);
-    doc.text("DIREKTORAT RESERSE KRIMINAL KHUSUS", 105, 22, {
-      align: "center",
-    });
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      "Jl. Lingkar Utara, Maguwoharjo, Depok, Sleman, Yogyakarta 55281",
-      105,
-      28,
-      { align: "center" }
-    );
-    doc.text(
-      "Telepon: (0274) 563494 | Email: reskrimsus@poldajogja.go.id",
-      105,
-      34,
-      { align: "center" }
-    );
-
-    // Garis pemisah
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.line(15, 45, 195, 45);
-
-    // Judul laporan
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(35, 55, 96);
-    doc.text("LAPORAN TRANSKRIPSI AUDIO", 105, 55, { align: "center" });
-
-    // Informasi meta data file
-    doc.setFillColor(242, 242, 247);
-    doc.roundedRect(15, 60, 180, 30, 2, 2, "F");
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(35, 55, 96);
-    doc.text("INFORMASI FILE", 20, 68);
-
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(60, 60, 60);
-    const fileInfo = [
-      `Nama File: ${fileName || "Tidak diketahui"}`,
-      `Tanggal Rekaman: ${date || "Tidak diketahui"}`,
-      `Tanggal Transkripsi: ${currentDate}`,
-    ];
-
-    let y = 75;
-    fileInfo.forEach((info) => {
-      doc.text(info, 20, y);
-      y += 7;
-    });
-
-    // Judul transkripsi
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(35, 55, 96);
-    doc.text("ISI TRANSKRIPSI", 20, 105);
-
-    // Box untuk konten transkripsi
-    doc.setDrawColor(220, 220, 220);
-    doc.setFillColor(248, 248, 252);
-    doc.roundedRect(15, 110, 180, 145, 2, 2, "FD");
-
-    // Isi transkripsi
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(40, 40, 40);
-
-    const startY = 118;
+  
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    const maxWidth = 170;
-    const lineHeight = 6;
-
-    // Implementasi penanganan teks yang lebih baik
-    const paragraphs = transcriptionText.split(/\n\s*\n/); // Split paragraphs
-
-    y = startY;
-    paragraphs.forEach((paragraph, idx) => {
-      // Format paragraph dengan benar
-      const lines = doc.splitTextToSize(paragraph, maxWidth);
-
-      // Cek apakah perlu halaman baru
-      if (y + lines.length * lineHeight > 250) {
-        doc.addPage();
-
-        // Header pada halaman baru
-        doc.setFillColor(35, 55, 96);
-        doc.rect(0, 0, 210, 20, "F");
-
+  
+    // ===== HEADER SECTION =====
+    try {
+      // Convert imported image to Data URL
+      const convertImageToDataURL = (imgSrc, callback) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL("image/png");
+          callback(dataURL);
+        };
+        img.src = poldaLogo;
+      };
+  
+      // Use the converted image
+      convertImageToDataURL(poldaLogo, (logoDataURL) => {
+        // Logo positioning - Slightly larger as requested
+        const logoWidth = 25;
+        const logoHeight = 25;
+        doc.addImage(logoDataURL, "PNG", margin, 15, logoWidth, logoHeight);
+  
+        // Header text - Updated with slight right alignment
+        // Menggeser header text sedikit ke kanan dari posisi tengah
+        const headerOffset = 5; // Offset untuk menggeser ke kanan, bisa diubah sesuai kebutuhan
+        
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
-        doc.setTextColor(255, 255, 255);
-        doc.text("KEPOLISIAN DAERAH ISTIMEWA YOGYAKARTA", 105, 10, {
+        doc.setFontSize(14);
+        // Tambahkan offset ke posisi tengah untuk menggeser ke kanan
+        doc.text("KEPOLISIAN NEGARA REPUBLIK INDONESIA", (pageWidth / 2) + headerOffset, 20, {
           align: "center",
         });
+        doc.setFontSize(13);
+        doc.text("DAERAH ISTIMEWA YOGYAKARTA", (pageWidth / 2) + headerOffset, 26, {
+          align: "center",
+        });
+        doc.setFontSize(12);
+        doc.text(
+          "BIDANG TEKNOLOGI INFORMASI DAN KOMUNIKASI",
+          (pageWidth / 2) + headerOffset,
+          32,
+          {
+            align: "center",
+          }
+        );
+        doc.setFontSize(11);
+        doc.text("SUBBIDANG TEKINFO", (pageWidth / 2) + headerOffset, 37, {
+          align: "center",
+        });
+  
+        // Address line
         doc.setFontSize(8);
-        doc.text("LANJUTAN TRANSKRIPSI", 105, 16, { align: "center" });
-
-        // Reset posisi untuk konten
-        y = 30;
-      }
-
-      // Tambahkan paragraf
-      lines.forEach((line) => {
-        doc.text(line, margin, y);
-        y += lineHeight;
+        doc.setFont("helvetica", "italic");
+        doc.text(
+          "Jl. Lingkar Selatan, Tamantirto, Kasihan, Bantul, Yogyakarta 55183",
+          (pageWidth / 2) + headerOffset,
+          43,
+          { align: "center" }
+        );
+  
+        // Blue line under header
+        doc.setDrawColor(0, 32, 96);
+        doc.setLineWidth(0.7);
+        doc.line(margin, 47, pageWidth - margin, 47);
+  
+        // Gold thin line
+        doc.setDrawColor(218, 165, 32);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 48.5, pageWidth - margin, 48.5);
+  
+        // Continue with the rest of the PDF generation
+        generateRemainingPDF();
       });
-
-      // Tambahkan spasi antar paragraf
-      if (idx < paragraphs.length - 1) {
-        y += 4;
-      }
-    });
-
-    // TTD dan informasi yang bertanggung jawab
-    y = Math.min(y + 15, 260); // Pastikan TTD tidak terlalu jauh
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Yogyakarta, " + currentDate, 140, y);
-
-    y += 5;
-    doc.text("Petugas Transkripsi,", 140, y);
-
-    y += 20; // Beri ruang untuk TTD
-    doc.setFont("helvetica", "bold");
-    doc.text(username.toUpperCase(), 140, y); // Username sebagai penanda tangan
-
-    // Tambahkan nomor dan kode dokumen di bawah
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    const docNumber =
-      "NO.DOK: " +
-      Math.floor(Math.random() * 1000000)
-        .toString()
-        .padStart(6, "0") +
-      "/" +
-      new Date().getFullYear();
-    doc.text(docNumber, 20, 280);
-
-    // Footer
-    for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) {
-      doc.setPage(i);
-
-      // Footer decoration line
-      doc.setDrawColor(35, 55, 96);
-      doc.setLineWidth(1);
-      doc.line(15, 285, 195, 285);
-
-      // Page number
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text(
-        `Halaman ${i} dari ${doc.internal.getNumberOfPages()}`,
-        105,
-        292,
-        { align: "center" }
-      );
-
-      // Confidential text
-      doc.setFontSize(7);
-      doc.text("DOKUMEN RESMI POLDA DIY - RAHASIA", 20, 292);
+  
+      // Function to generate the rest of the PDF after logo is processed
+      const generateRemainingPDF = () => {
+        // ===== DOCUMENT TITLE =====
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("HASIL TRANSKRIPSI REKAMAN AUDIO", pageWidth / 2, 60, {
+          align: "center",
+        });
+  
+        // ===== DOCUMENT INFORMATION SECTION =====
+        // Outline box untuk informasi dokumen
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, 70, pageWidth - margin * 2, 30); // Document box dengan tinggi yang disesuaikan
+  
+        // Document information headers
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("INFORMASI DOKUMEN", margin + 2, 77);
+  
+        // Document details
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+  
+        const currentDate = new Date().toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+  
+        const displayFileName = fileMetadata.name || fileName || "File Audio";
+        const displayDate = fileMetadata.date || date || currentDate;
+        const fileID = `VOX-${Date.now()
+          .toString()
+          .substring(8, 13)}/${new Date().getFullYear()}`;
+  
+        // Left column
+        doc.text("Nomor Berkas", margin + 5, 85);
+        doc.text("Nama File", margin + 5, 92);
+        doc.text("Tanggal Rekaman", margin + 5, 99);
+  
+        // Colon separator
+        doc.text(":", margin + 40, 85);
+        doc.text(":", margin + 40, 92);
+        doc.text(":", margin + 40, 99);
+  
+        // Right column (values)
+        doc.text(fileID, margin + 45, 85);
+        doc.text(displayFileName, margin + 45, 92);
+        doc.text(displayDate, margin + 45, 99);
+  
+        // ===== CLASSIFICATION SECTION (di bawah informasi dokumen dalam box terpisah) =====
+        // Outline box untuk klasifikasi
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, 110, pageWidth - margin * 2, 20); // Box klasifikasi di bawah informasi
+  
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("KLASIFIKASI", margin + 2, 117);
+        
+        // Format yang sama dengan informasi dokumen
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text("Keterangan", margin + 5, 125);
+        doc.text(":", margin + 40, 125);
+        doc.text(
+          transcriptionLabel || "Pertanyaan",
+          margin + 45, 
+          125
+        );
+  
+        // ===== TRANSCRIPTION CONTENT =====
+        // Transcription box
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, 140, pageWidth - margin * 2, pageHeight - 205); // Box for transcription content
+  
+        // Judul ISI TRANSKRIPSI di dalam kotak
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("ISI TRANSKRIPSI:", margin + 2, 147);
+  
+        // Add transcription text inside the box
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+  
+        const transcriptionContent =
+          transcriptionText || "Tidak ada transkripsi tersedia.";
+        const maxWidth = pageWidth - margin * 2 - 10; // Slightly smaller to add padding inside the box
+        
+        // Menggunakan perataan justify untuk teks transkripsi
+        const splitText = doc.splitTextToSize(transcriptionContent, maxWidth);
+        
+        // Menerapkan alignment justify untuk teks transkripsi
+        doc.text(splitText, margin + 5, 160, { 
+          align: "justify",
+          maxWidth: maxWidth 
+        });
+  
+        // ===== FOOTER SECTION =====
+        // Calculate footer position
+        const footerY = pageHeight - 25;
+  
+        // Footer lines
+        doc.setDrawColor(0, 32, 96);
+        doc.setLineWidth(0.7);
+        doc.line(margin, footerY, pageWidth - margin, footerY);
+  
+        doc.setDrawColor(218, 165, 32);
+        doc.setLineWidth(0.3);
+        doc.line(margin, footerY + 1.5, pageWidth - margin, footerY + 1.5);
+  
+        // Footer text
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text(
+          "Dokumen ini dihasilkan oleh sistem Dispatch Vox Polda DIY",
+          pageWidth / 2,
+          footerY + 7,
+          {
+            align: "center",
+          }
+        );
+  
+        // Left side: timestamp
+        const timestamp = new Date()
+          .toLocaleString("id-ID", {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+          })
+          .replace(/\./g, ":");
+  
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text(`Dicetak: ${timestamp}`, margin, footerY + 13);
+  
+        // Right side: page numbers
+        doc.text(`Halaman 1 dari 1`, pageWidth - margin, footerY + 13, {
+          align: "right",
+        });
+  
+        // ===== SAVE PDF =====
+        const safeName = displayFileName
+          .replace(/[^a-z0-9]/gi, "_")
+          .toLowerCase();
+        const dateStamp = new Date()
+          .toISOString()
+          .slice(0, 10)
+          .replace(/-/g, "");
+        doc.save(`TRANSKRIPSI_POLDA_DIY_${safeName}_${dateStamp}.pdf`);
+      };
+    } catch (error) {
+      console.error("Error adding header to PDF:", error);
+  
+      // If there's an error with the logo, still generate the PDF without it
+      // Add basic fallback PDF generation here
+      const safeName = (fileMetadata.name || fileName || "File_Audio")
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase();
+      const dateStamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      doc.save(`TRANSKRIPSI_POLDA_DIY_${safeName}_${dateStamp}.pdf`);
     }
-
-    // File name tanpa karakter khusus untuk nama file
-    const sanitizedFileName = fileName
-      ? fileName.replace(/[^a-zA-Z0-9]/g, "_")
-      : "Rekaman_Audio";
-
-    const outputFileName = `TRANSKRIP_POLDA_DIY_${sanitizedFileName}_${
-      new Date().toISOString().split("T")[0]
-    }.pdf`;
-
-    doc.save(outputFileName);
   };
 
   const handleUploadNew = () => {
@@ -285,6 +375,26 @@ const Transcription = () => {
     }
   };
 
+  // Function to get classification badge color
+  const getClassificationColor = (label) => {
+    switch (label?.toLowerCase()) {
+      case "aduan":
+        return "bg-red-500";
+      case "informasi":
+        return "bg-blue-500";
+      case "pertanyaan":
+        return "bg-yellow-500";
+      case "permintaan":
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  // Display file name with fallback
+  const displayFileName = fileMetadata.name || fileName || "File Audio";
+  const displayDate = fileMetadata.date || date || "Hari ini";
+
   return (
     <div
       className="min-h-screen bg-cover bg-center"
@@ -309,11 +419,9 @@ const Transcription = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-xl font-semibold text-white">
-                {fileName || "File tidak diketahui"}
+                {displayFileName}
               </h2>
-              <span className="text-white/80 text-sm">
-                {date || "Tanggal tidak diketahui"}
-              </span>
+              <span className="text-white/80 text-sm">{displayDate}</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <button
@@ -395,27 +503,93 @@ const Transcription = () => {
             </div>
           ) : (
             <>
-              <div className="flex items-center bg-white/5 p-4 border-b border-white/20">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-400 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <h3 className="text-white font-medium">Hasil Transkripsi</h3>
+              <div className="flex items-center justify-between bg-white/5 p-4 border-b border-white/20">
+                <div className="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-blue-400 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-white font-medium">Hasil Transkripsi</h3>
+                </div>
+                {transcriptionLabel && (
+                  <div
+                    className={`px-3 py-1 rounded text-white text-sm font-medium ${getClassificationColor(
+                      transcriptionLabel
+                    )}`}
+                  >
+                    {transcriptionLabel}
+                  </div>
+                )}
               </div>
+
               <div className="p-6 min-h-[400px] overflow-y-auto bg-gradient-to-b from-white/5 to-transparent">
-                <p className="text-white whitespace-pre-wrap leading-relaxed">
-                  {transcriptionText}
-                </p>
+                {/* Classification section */}
+                {transcriptionLabel && (
+                  <div className="mb-6 p-4 rounded-lg bg-white/5 border border-white/10">
+                    <h4 className="text-white font-medium mb-2 flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                        />
+                      </svg>
+                      Klasifikasi Audio:
+                    </h4>
+                    <div className="flex items-center">
+                      <span
+                        className={`px-4 py-2 rounded text-white font-medium ${getClassificationColor(
+                          transcriptionLabel
+                        )}`}
+                      >
+                        {transcriptionLabel}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Transcription content */}
+                <div>
+                  <h4 className="text-white font-medium mb-3 flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                    Isi Transkripsi:
+                  </h4>
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <p className="text-white whitespace-pre-wrap leading-relaxed">
+                      {transcriptionText}
+                    </p>
+                  </div>
+                </div>
               </div>
             </>
           )}

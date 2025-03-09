@@ -21,23 +21,23 @@ const uploadAudio = async (req, res) => {
   try {
     console.log("🚀 Received file from frontend:", req.file);
 
-    // ✅ Perbaikan: Gunakan FormData dengan benar
+    // ✅ Gunakan FormData dengan benar
     const formData = new FormData();
     const fileStream = fs.createReadStream(audioFilePath);
 
     formData.append("file", fileStream, {
-      filename: req.file.originalname, // Kirim nama file asli
-      contentType: req.file.mimetype, // Kirim tipe MIME asli
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
     });
 
     console.log("📤 Sending file to FastAPI...");
 
-    // ✅ Perbaikan: Gunakan header dari FormData
+    // ✅ Kirim file ke FastAPI dengan header yang sesuai
     const response = await axios.post(FASTAPI_URL, formData, {
       headers: {
         ...formData.getHeaders(),
       },
-      maxBodyLength: Infinity, // Hindari batasan ukuran file
+      maxBodyLength: Infinity,
     });
 
     console.log("🔄 FastAPI Status:", response.status);
@@ -55,7 +55,7 @@ const uploadAudio = async (req, res) => {
       fs.unlink(audioFilePath, (err) => {
         if (err) console.error("❌ Error deleting file:", err);
       });
-    }, 5000); // Tunggu 5 detik sebelum menghapus file agar FastAPI sempat membaca
+    }, 5000);
   } catch (error) {
     console.error(
       "❌ Axios Error:",
@@ -68,4 +68,3 @@ const uploadAudio = async (req, res) => {
 };
 
 module.exports = { uploadAudio };
-SS;

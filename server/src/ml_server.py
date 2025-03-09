@@ -56,7 +56,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="File tidak valid.")
 
-    print(f"📂 Received file: {file.filename}, Type: {file.content_type}")
+    # Simpan nama file asli
+    original_filename = file.filename
+    print(f"📂 Received file: {original_filename}, Type: {file.content_type}")
 
     wav_path = None
 
@@ -85,7 +87,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         
         with torch.no_grad():
             forced_decoder_ids = processor.get_decoder_prompt_ids(language="id", task="transcribe")
-            predicted_ids = whisper_model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=300)
+            predicted_ids = whisper_model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_length=600)
 
         transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 
@@ -98,7 +100,13 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
         print(f"Transcription: {transcription}, Label: {label}")
 
-        return {"transcription": transcription, "label": label}
+        # Kembalikan respons dengan nama file asli dan field fileName untuk kompatibilitas frontend
+        return {
+            "original_filename": original_filename,
+            "fileName": original_filename,  # Menambahkan field ini agar kompatibel dengan frontend
+            "transcription": transcription, 
+            "label": label
+        }
 
     except Exception as e:
         print(f"ERROR: {str(e)}")

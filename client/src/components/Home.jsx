@@ -46,7 +46,7 @@ const Home = () => {
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", audio); // <== Nama field "audio"
+    formData.append("file", audio);
 
     try {
       const response = await fetch("http://localhost:5000/api/audio/upload", {
@@ -59,25 +59,24 @@ const Home = () => {
       }
 
       const data = await response.json();
+
+      // Simpan hasil transkripsi ke state
       setResponseMessage(
         `Transcription: ${data.transcription}, Label: ${data.label}`
       );
+
+      // 🚀 Pindah ke halaman hasil transkripsi
+      navigate("/transcription", {
+        state: { transcription: data.transcription, label: data.label },
+      });
     } catch (error) {
       console.error("Error:", error);
-
-      // Tampilkan pesan error yang lebih spesifik
-      let errorMessage = "Gagal mengunggah audio";
-
-      if (error.response && error.response.data) {
-        errorMessage += ": " + (error.response.data.error || error.message);
-      } else if (error.message) {
-        errorMessage += ": " + error.message;
-      }
-
-      alert(errorMessage);
+      alert("Gagal mengunggah audio: " + error.message);
+    } finally {
       setIsUploading(false);
     }
   };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
