@@ -8,7 +8,7 @@ const generateToken = (user) => {
   const payload = {
     id: user._id,
     username: user.username,
-    role: user.role, // Tambahkan ini
+    role: user.role,
   };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 };
@@ -72,7 +72,7 @@ const loginUser = async (req, res) => {
     res.status(200).send({
       message: "Logged in successfully",
       token,
-      role: user.role, // Tambahkan ini
+      role: user.role,
     });
   } catch (error) {
     console.error("Error during login:", error.message || error);
