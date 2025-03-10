@@ -100,10 +100,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
         print(f"Transcription: {transcription}, Label: {label}")
 
-        # Kembalikan respons dengan nama file asli dan field fileName untuk kompatibilitas frontend
         return {
             "original_filename": original_filename,
-            "fileName": original_filename,  # Menambahkan field ini agar kompatibel dengan frontend
+            "fileName": original_filename,
             "transcription": transcription, 
             "label": label
         }
@@ -122,35 +121,23 @@ def classify_text(transcription):
     """Klasifikasikan teks menggunakan model TensorFlow/Keras."""
     print(f"📜 Received transcription for classification: {transcription}")
 
-    # 🔍 Tokenisasi teks
     sequence = tokenizer.texts_to_sequences([transcription])
     if not sequence or len(sequence[0]) == 0:
         print("❌ Tokenization failed: Empty sequence")
         raise HTTPException(status_code=500, detail="Tokenization failed: Empty sequence")
 
-    print(f"🔢 Tokenized sequence: {sequence}")
-
-    # 🔍 Padding (Gunakan maxlen=100 agar sesuai dengan training)
     padded = pad_sequences(sequence, maxlen=100, padding="post", truncating="post")
-    print(f"📏 Padded sequence shape: {padded.shape}")  # Seharusnya (1, 100)
+    print(f"📏 Padded sequence shape: {padded.shape}")
 
-    # 🔍 Konversi ke NumPy array dengan tipe float32
-    padded = np.array(padded, dtype=np.float32)
-    print(f"📊 Final input shape for model: {padded.shape}")  # Seharusnya (1, 100)
-
-    # 🔍 Prediksi menggunakan model
     try:
         prediction = classification_model.predict(padded)
-        print(f"📊 Prediction shape: {prediction.shape}")  # Seharusnya (1, 4)
+        print(f"🔮 Probabilities: {prediction}")  # Menampilkan probabilitas tiap kelas
+        label_index = np.argmax(prediction, axis=1)[0]
+        print(f"🏷 Chosen index: {label_index}")
     except Exception as e:
         print(f"❌ Model prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Model prediction failed: {str(e)}")
 
-    # 🔍 Ambil indeks dengan probabilitas tertinggi
-    label_index = np.argmax(prediction, axis=1)[0]
-    print(f"🏷 Predicted label index: {label_index}")
-
-    # 🔍 Pastikan label valid sebelum dikembalikan
     try:
         label = label_encoder.inverse_transform([label_index])[0]
     except Exception as e:
