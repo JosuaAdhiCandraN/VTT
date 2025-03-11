@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException 
+import requests
 import torch
 import torchaudio
 import tempfile
@@ -12,7 +13,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = FastAPI()
-
+EP = "http://localhost:5000/api/transcription/save"
 # Load Whisper model
 whisper_model_name = "openai/whisper-small"
 processor = WhisperProcessor.from_pretrained(whisper_model_name)
@@ -100,6 +101,16 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
         print(f"Transcription: {transcription}, Label: {label}")
 
+        # 🔴 **Tambahkan request ke Express.js untuk menyimpan ke MongoDB**
+        payload = {"transcription": transcription, "label": label}
+
+        try:
+            response = requests.post(EP, json=payload, timeout=5)
+            print(f"✅ Data sent to Express.js: {response.json()}")
+        except Exception as e:
+            print(f"❌ Failed to send data to Express.js: {e}")
+
+        # Kembalikan respons untuk frontend
         return {
             "original_filename": original_filename,
             "fileName": original_filename,
