@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
-const axios = require("axios");
 const FormData = require("form-data");
+const axios = require("axios");
 
 const FASTAPI_URL = "http://localhost:8001/transcribe";
 
@@ -12,7 +12,7 @@ const uploadAudio = async (req, res) => {
 
   const audioFilePath = path.join(__dirname, "../../temp", req.file.filename);
 
-  // ✅ Pastikan file ada sebelum dikirim ke FastAPI
+  // ✅ Pastikan file ada sebelum dikirim
   if (!fs.existsSync(audioFilePath)) {
     console.error("❌ File not found at:", audioFilePath);
     return res.status(500).json({ error: "File tidak ditemukan di server" });
@@ -21,20 +21,17 @@ const uploadAudio = async (req, res) => {
   try {
     console.log("🚀 Received file from frontend:", req.file);
 
-    // ✅ Gunakan FormData dengan benar
     const formData = new FormData();
-    const fileStream = fs.createReadStream(audioFilePath);
-
-    formData.append("file", fileStream, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
+    formData.append("file", fs.createReadStream(audioFilePath), {
+      filename: req.file.originalname,  // Pastikan nama file dikirim
+      contentType: req.file.mimetype,  // Pastikan mime-type dikirim
     });
 
     console.log("📤 Sending file to FastAPI...");
 
-    // ✅ Kirim file ke FastAPI dengan header yang sesuai
     const response = await axios.post(FASTAPI_URL, formData, {
       headers: {
+        "Content-Type": "multipart/form-data",  // ✅ Tambahkan header eksplisit
         ...formData.getHeaders(),
       },
       maxBodyLength: Infinity,
@@ -50,20 +47,14 @@ const uploadAudio = async (req, res) => {
       label: response.data.label,
     });
 
-    // ✅ Hapus file setelah diproses untuk menghemat penyimpanan
-    setTimeout(() => {
-      fs.unlink(audioFilePath, (err) => {
-        if (err) console.error("❌ Error deleting file:", err);
-      });
-    }, 5000);
+    // ✅ Hapus file setelah diproses
+    fs.unlink(audioFilePath, (err) => {
+      if (err) console.error("❌ Error deleting file:", err);
+    });
+
   } catch (error) {
-    console.error(
-      "❌ Axios Error:",
-      error.response ? error.response.data : error.message
-    );
-    res
-      .status(500)
-      .json({ error: "Transcription failed", details: error.message });
+    console.error("❌ Axios Error:", error.response ? error.response.data : error.message);
+    res.status(500).json({ error: "Transcription failed", details: error.message });
   }
 };
 

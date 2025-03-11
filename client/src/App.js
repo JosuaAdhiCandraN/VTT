@@ -6,7 +6,7 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import Dashboard from "./components/Dashbord";
 import Transcriptiont from "./components/Transcription";
-import PrivateRoute from "./components/PrivateRoute"; // Import PrivateRoute
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);

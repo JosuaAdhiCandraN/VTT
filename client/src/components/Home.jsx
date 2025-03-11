@@ -43,40 +43,41 @@ const Home = () => {
       alert("Pilih file audio terlebih dahulu!");
       return;
     }
-
+  
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", audio);
-
+    formData.append("file", audio);  // <== Nama field "audio"
+  
     try {
       const response = await fetch("http://localhost:5000/api/audio/upload", {
         method: "POST",
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
 
       const data = await response.json();
-
-      // Simpan hasil transkripsi ke state
       setResponseMessage(
         `Transcription: ${data.transcription}, Label: ${data.label}`
       );
-
-      // 🚀 Pindah ke halaman hasil transkripsi
-      navigate("/transcription", {
-        state: { transcription: data.transcription, label: data.label },
-      });
     } catch (error) {
       console.error("Error:", error);
-      alert("Gagal mengunggah audio: " + error.message);
-    } finally {
+
+      // Tampilkan pesan error yang lebih spesifik
+      let errorMessage = "Gagal mengunggah audio";
+
+      if (error.response && error.response.data) {
+        errorMessage += ": " + (error.response.data.error || error.message);
+      } else if (error.message) {
+        errorMessage += ": " + error.message;
+      }
+
+      alert(errorMessage);
       setIsUploading(false);
     }
   };
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
